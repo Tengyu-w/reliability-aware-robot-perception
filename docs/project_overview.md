@@ -1,15 +1,16 @@
 # Project Overview
 
-This repository is a reliability-aware perception and action monitoring
-prototype. It starts from a sequential video-action baseline, then extends the
-same evidence pattern to RGB-D robot perception, runtime assurance, and
-action-outcome residual monitoring.
+This repository is now framed as a VPPV-style perception reliability monitor.
+The original sequential, RGB-D, temporal, calibration, and trajectory residual
+experiments are used as evidence layers for one question: when should a
+surgical autonomy pipeline stop trusting its visual front-end state?
 
 ## Core Question
 
-Can embedding-space evidence, calibration analysis, and residual monitoring
-identify when a learned perception-action system is unreliable enough to slow
-down, recover, replan, or request human review?
+Can depth, temporal, embedding, trajectory, calibration, and coverage-risk
+signals be distilled into a lightweight `visual_state_risk` score that routes a
+VPPV-style system to continue, re-perceive, recover, replan, or request human
+review?
 
 ## Pipeline
 
@@ -18,19 +19,24 @@ flowchart LR
     A["ECG uncertainty foundation"] --> B["Video action embeddings"]
     B --> C["RGB-D / depth reliability"]
     C --> D["Temporal + pose-aware analysis"]
-    D --> E["Runtime assurance monitor"]
-    E --> F["Trajectory residual monitoring"]
+    D --> E["VPPV visual-state risk distillation"]
+    E --> F["Runtime route policy"]
+    F --> G["Trajectory residual / outcome link"]
 
     C --> C1["TUM RGB-D corruption benchmark"]
     D --> D1["Global / grid / PCA descriptor comparison"]
-    E --> E1["NORMAL / SUSPECT / RECOVER / HUMAN_REVIEW"]
-    F --> F1["planned vs observed action outcome"]
+    E --> E1["visual_state_risk"]
+    F --> F1["NORMAL / SUSPECT / RECOVER / HUMAN_REVIEW"]
+    G --> G1["planned vs observed action outcome"]
 ```
 
 ## Evidence Summary
 
 | Layer | Dataset / setup | Key result | Interpretation |
 |---|---:|---:|---|
+| VPPV risk distillation | 1800 aligned visual/action samples | Random Forest teacher ROC-AUC 0.992 | Depth/temporal/embedding/trajectory evidence becomes `visual_state_risk` |
+| VPPV route evaluation | Distilled risk states | 1350 NORMAL, 433 SUSPECT, 17 RECOVER, 0 HUMAN_REVIEW | Risk maps to concrete VPPV autonomy actions |
+| Outcome-linked validation | Risk vs downstream signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | The score is decision-relevant, not only a teacher fit |
 | Synthetic 3D reliability | Synthetic depth corruptions | ROC-AUC 0.804 +/- 0.028 | Smoke evidence for embedding-risk scoring |
 | TUM RGB-D corruption | 300 depth files, 1800 samples | source-paired ROC-AUC 1.000 | Controlled corruptions are detectable |
 | TUM scene-conditioned baseline | Same TUM run | ROC-AUC 0.483 | Global clean references fail under camera motion |
@@ -44,7 +50,9 @@ flowchart LR
 
 ## What This Shows
 
-- The project has a reproducible RGB-D reliability workflow on TUM RGB-D.
+- The project can be described as a VPPV visual-front-end reliability monitor.
+- `visual_state_risk` distills heavier reliability evidence into a lightweight
+  runtime score.
 - Naive embedding distance can fail under normal camera motion.
 - Local and learned descriptors improve pose-awareness, especially for rotation.
 - Reliability scores can be converted into runtime states and recovery actions.
@@ -61,6 +69,7 @@ flowchart LR
 
 | Supervisor direction | Read first |
 |---|---|
+| VPPV / surgical autonomy | `reports/vppv_perception_reliability_monitor.md` |
 | Trustworthy ML / calibration | `docs/application_evidence_pack.md`, calibration section |
 | Runtime assurance / formal methods | `docs/application_evidence_pack.md`, runtime monitor section |
 | Medical / surgical robotics | `docs/final_report.pdf`, trajectory residual section |
@@ -69,6 +78,8 @@ flowchart LR
 
 ## Best Next Experiment
 
-Replace the PCA descriptor with a pretrained or task-supervised RGB-D/depth
-encoder, then validate reliability against a dataset-native target such as SLAM
-tracking quality, pose error, navigation progress, or tool trajectory logs.
+Replace the current proxy labels with VPPV-native evidence: segmentation-mask
+quality, depth quality, surgical-tool state regression error, simulator
+rollouts, or surgical-tool tracking logs. Then evaluate whether
+`visual_state_risk` predicts downstream VPPV policy failures and reduces unsafe
+execution through re-perception, recovery, or human review.

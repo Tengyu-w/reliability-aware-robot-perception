@@ -4,17 +4,31 @@
 
 One-page summary: `docs/supervisor_one_pager.md`.
 
-This project extends a sequential perception baseline into video action understanding and robot 3D perception. The central question is whether embedding-space evidence, temporal consistency, calibration-style uncertainty, and selective prediction can identify unreliable model or perception inputs before downstream decisions.
+This project now frames the RGB-D reliability work as a VPPV-style visual-front-end monitor for surgical autonomy. The central question is whether depth, temporal, embedding, trajectory, calibration, and coverage-risk evidence can identify unreliable visual state before a downstream policy is trusted.
 
 ## Evidence Layers
 
 | Layer | What it demonstrates | Current status |
 |---|---|---|
+| VPPV perception monitor | Visual-state risk distillation and runtime route policy | Implemented in `modules/run_vppv_perception_monitor.py` |
 | Video action recognition | Sequential perception embeddings and action-class reliability | Implemented in `modules/main.py` and `modules/embedding_analysis.py` |
 | Synthetic 3D perception | Depth-to-point-cloud embedding reliability under controlled corruptions | Implemented and runnable |
 | Real depth workflow | Public depth-map preparation, profiling, and corruption benchmark | Implemented; TUM RGB-D sample run completed in current outputs |
 
 ## Current 3D Reliability Results
+
+### VPPV-Style Perception Monitor
+
+- Samples: 1800
+- Distilled risk output: `visual_state_risk`
+- Selected model: Random Forest
+- Teacher ROC-AUC: 0.992
+- Teacher average precision: 0.982
+- Runtime states: 1350 NORMAL / 433 SUSPECT / 17 RECOVER / 0 HUMAN_REVIEW
+- Spearman risk vs trajectory residual: 0.543
+- Spearman risk vs temporal excess: 0.521
+- Top 10% risk captures RECOVER/HUMAN_REVIEW states: 1.000
+- Interpretation: the monitor provides a VPPV-facing front-end reliability score and maps high-risk visual states to re-perception, recovery, replanning, or human review.
 
 ### Multi-Seed Synthetic Depth Benchmark
 
@@ -103,6 +117,7 @@ This project extends a sequential perception baseline into video action understa
 
 | Supervisor direction | Matching evidence |
 |---|---|
+| VPPV surgical autonomy | Visual-state risk distillation, route policy, and runtime state machine |
 | Trustworthy ML / calibration / robustness | Embedding risk, uncertainty scores, selective prediction, multi-seed reporting |
 | Human-robot collaboration / industrial AI | Action recognition reliability and 3D perception screening around tools/workcells |
 | Reliable 3D scene understanding | Depth-to-point-cloud embeddings and corruption detection |
@@ -111,6 +126,8 @@ This project extends a sequential perception baseline into video action understa
 
 ## What Is Shown
 
+- The project has a working VPPV-style monitor that turns RGB-D reliability and trajectory evidence into `visual_state_risk`.
+- The monitor includes feature attribution, signal-group ablation, top-risk case explanations, route policy, and outcome-linked validation.
 - The project has working code for video embeddings and 3D geometry embeddings.
 - The 3D module can detect controlled perception corruptions using embedding-distance risk.
 - TUM RGB-D results show that naive global/local distance can fail under camera motion, motivating temporal excess scoring.
@@ -123,10 +140,11 @@ This project extends a sequential perception baseline into video action understa
 
 ## What Remains Unproven
 
-- These results are not closed-loop robot validation.
+- These results are not closed-loop VPPV or surgical robot validation.
+- Segmentation-mask reliability and perceptual regressor error are not yet directly measured.
 - Synthetic or controlled corruptions do not replace dataset-native failure labels.
 - Public-data results should be added before making strong claims about real-world robot perception.
 
 ## Next Experiment
 
-Replace synthetic trajectory residuals with robot logs, surgical-tool tracking, or simulator rollouts; then evaluate monitor decisions against downstream task failures.
+Replace proxy residuals with VPPV simulator rollouts, segmentation-mask quality, surgical-tool tracking, or perceptual regressor errors; then evaluate whether `visual_state_risk` predicts downstream policy failures.
