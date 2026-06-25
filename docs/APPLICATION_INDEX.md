@@ -6,7 +6,7 @@ autonomy: a lightweight runtime monitor that checks whether visual parsing,
 depth, perceptual state regression, and physical state evidence are trustworthy
 enough for downstream policy execution.
 
-##  Summary
+## Summary
 
 This project upgrades an RGB-D reliability workflow into a VPPV visual-front-end
 monitor. It distills depth, temporal, embedding, trajectory, calibration, and
@@ -35,8 +35,9 @@ Suggested wording:
 | 3 minutes | [VPPV monitor report](../reports/vppv_perception_reliability_monitor.md) | Main upgraded project narrative |
 | 5 minutes | [PhD application brief](phd_application_project_brief.md) | Concise supervisor-facing project narrative |
 | 10 minutes | [Application evidence pack](application_evidence_pack.md) | Evidence layer by layer |
+| 10 minutes | [Visual evidence index](VISUAL_EVIDENCE_INDEX.md) | All public figures and snapshot tables |
 | 15 minutes | [Supervisor one-pager](supervisor_one_pager.md) | One-page research summary |
-| Deep dive | [Final report PDF](final_report.pdf) | Full report with figures and tables |
+| Deep dive | [Project overview](project_overview.md) + [VPPV report](../reports/vppv_perception_reliability_monitor.md) | Technical narrative with evidence and limitations |
 
 ## Evidence Snapshot
 

@@ -24,7 +24,6 @@ It is mapped into auditable runtime states: `NORMAL`, `SUSPECT`, `RECOVER`, and
 | [`docs/APPLICATION_INDEX.md`](docs/APPLICATION_INDEX.md) | Supervisor-facing entry point for PhD applications |
 | [`docs/phd_application_project_brief.md`](docs/phd_application_project_brief.md) | Concise project brief with fit, evidence, and limits |
 | [`reports/vppv_perception_reliability_monitor.md`](reports/vppv_perception_reliability_monitor.md) | VPPV-style perception-state reliability monitor report |
-| [`docs/final_report.pdf`](docs/final_report.pdf) | Full report with the most complete narrative, figures, and tables |
 | [`docs/project_overview.md`](docs/project_overview.md) | Short technical overview of the research question and pipeline |
 | [`docs/application_evidence_pack.md`](docs/application_evidence_pack.md) | Compact evidence summary for supervisors or reviewers |
 | [`docs/experiment_order.md`](docs/experiment_order.md) | Recommended order for reading and rerunning the experiments |
@@ -111,7 +110,6 @@ modules/
   run_vppv_perception_monitor.py       # VPPV visual-state risk distillation and routing
   calibration_analysis.py              # Calibration and coverage-risk analysis
   trajectory_residual_demo.py          # Action-outcome residual reliability demo
-  build_evidence_pack.py               # Evidence-pack generator
 ```
 
 See [`modules/readme.md`](modules/readme.md) and
@@ -175,14 +173,6 @@ python tools/generate_vppv_visual_gallery.py
 
 The public snapshot tables are stored in `docs/tables/vppv_*.csv` and
 `docs/tables/vppv_risk_outcome_correlation.json`.
-
-The older compact evidence summary can still be rebuilt with:
-
-```bash
-python modules/build_evidence_pack.py \
-  --project-root . \
-  --output docs/application_evidence_pack.md
-```
 
 Dataset card drafts are provided for TUM RGB-D, NYU Depth V2, KITTI depth, and
 SUN RGB-D under [`docs/dataset_cards/`](docs/dataset_cards/).

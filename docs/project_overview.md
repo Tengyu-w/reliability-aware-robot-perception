@@ -72,7 +72,7 @@ flowchart LR
 | VPPV / surgical autonomy | `reports/vppv_perception_reliability_monitor.md` |
 | Trustworthy ML / calibration | `docs/application_evidence_pack.md`, calibration section |
 | Runtime assurance / formal methods | `docs/application_evidence_pack.md`, runtime monitor section |
-| Medical / surgical robotics | `docs/final_report.pdf`, trajectory residual section |
+| Medical / surgical robotics | `reports/vppv_perception_reliability_monitor.md`, VPPV route policy and outcome-link sections |
 | Embodied AI / navigation | TUM temporal and pose-aware sections in this overview |
 | Transferability estimation | Descriptor comparison: global -> grid -> PCA |
 

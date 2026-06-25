@@ -1,7 +1,15 @@
 # Code Map
 
 The code is organized as small entry points around a common reliability-analysis
-theme. The recommended reading order is in `docs/experiment_order.md`.
+theme. The current primary entry point is the VPPV-style perception monitor.
+The recommended reading order is in `docs/experiment_order.md`.
+
+## VPPV Perception Monitor
+
+- `run_vppv_perception_monitor.py`: distills depth, temporal, embedding,
+  trajectory, calibration, and coverage-risk signals into `visual_state_risk`;
+  exports feature attribution, signal-group ablation, top-risk explanations,
+  route policy, state counts, and outcome-linked validation.
 
 ## Core Video Baseline
 
@@ -33,5 +41,4 @@ theme. The recommended reading order is in `docs/experiment_order.md`.
 - `runtime_monitor.py`: converts reliability scores into runtime states.
 - `calibration_analysis.py`: calibration and coverage-risk analysis.
 - `trajectory_residual_demo.py`: planned-vs-observed action-outcome residuals.
-- `build_evidence_pack.py`: compiles a compact research evidence summary.
 
