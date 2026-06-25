@@ -6,7 +6,7 @@ autonomy: a lightweight runtime monitor that checks whether visual parsing,
 depth, perceptual state regression, and physical state evidence are trustworthy
 enough for downstream policy execution.
 
-## Thirty-Second Summary
+##  Summary
 
 This project upgrades an RGB-D reliability workflow into a VPPV visual-front-end
 monitor. It distills depth, temporal, embedding, trajectory, calibration, and
