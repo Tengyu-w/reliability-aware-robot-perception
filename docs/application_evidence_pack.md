@@ -140,7 +140,29 @@ the overall project name.
 | Reliable 3D scene understanding | Depth-to-point-cloud embeddings and corruption detection |
 | Embodied navigation / autonomous systems | Perception risk as a trigger for abstention, fallback, or human review |
 | Medical or clinical trustworthy AI | ECG reliability project plus transferable reliability methodology |
-| Surgical autonomy / VPPV | Optional transfer case for front-end visual-state reliability |
+| Surgical autonomy / VPPV | Application case for front-end visual-state reliability |
+
+## VPPV-Style Surgical Autonomy Transfer
+
+The VPPV-style transfer case is included because it makes the reliability
+monitor concrete in a high-stakes robot learning setting. A VPPV-style autonomy
+pipeline can depend on visual parsing, depth, perceptual regression, physical
+state, and policy execution. The project provides a companion monitor for those
+front-end states:
+
+| Failure source | Monitor signal |
+|---|---|
+| Depth estimation error | depth validity, mean depth, depth variance, depth corruption score |
+| Visual state jump | temporal local distance, temporal excess score |
+| Perceptual state off-distribution | embedding shift |
+| Action outcome mismatch | trajectory residual |
+| Calibration or observation confidence issue | calibration gap, coverage-risk score |
+| Task stagnation | progress slope, progress stagnation score |
+
+The important interpretation is that VPPV-style reliability should be local and
+temporal, not only global-reference based. Surgical camera motion, tool motion,
+and tissue motion can be expected; the monitor focuses on whether the current
+change exceeds the recent local pattern.
 
 ## What Is Shown
 

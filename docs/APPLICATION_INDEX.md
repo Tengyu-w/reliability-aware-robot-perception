@@ -36,6 +36,29 @@ Suggested surgical-autonomy wording:
 > front end, where unreliable depth, visual parsing, perceptual state
 > regression, or action-outcome consistency could mislead a downstream policy.
 
+## VPPV-Style Transfer Case
+
+This section should be used when writing to surgical autonomy or medical robot
+learning supervisors. The project does not rename or reproduce VPPV. Instead,
+it proposes a reliability layer that can sit before a VPPV-style downstream
+policy.
+
+| VPPV-style dependency | Reliability question | Project signal |
+|---|---|---|
+| Segmentation / visual parsing | Is the visual state still coherent? | embedding shift, temporal excess |
+| Depth map | Is geometry corrupted or unstable? | depth validity, mean depth, depth variance |
+| Perceptual regressor | Has the regressed state jumped unexpectedly? | local temporal distance, embedding shift |
+| Physical state vector | Is task progress plausible? | progress slope, progress stagnation |
+| Policy execution result | Did the action produce the expected outcome? | trajectory residual |
+
+The strongest application message is:
+
+> VPPV-style autonomy should not trust visual state solely because it is close
+> to a global clean reference. In surgical scenes, camera, tool, and tissue
+> motion are expected. The useful monitor checks whether the current state
+> change exceeds normal local temporal variation, then routes the system to
+> continue, re-perceive, recover, or request human review.
+
 ## What To Read
 
 | Time budget | File | Purpose |
@@ -92,7 +115,7 @@ Suggested surgical-autonomy wording:
 | Embodied AI / safe RL | Perception risk as a trigger for replanning, recovery, or clarification. |
 | Human-robot collaboration | Monitor states for slowing down or requesting human review. |
 | Reliable 3D scene understanding | Depth and point-cloud reliability under corruption and camera motion. |
-| Surgical robotics / VPPV | Optional transfer case for front-end visual-state reliability. |
+| Surgical robotics / VPPV | Detailed transfer case for front-end visual-state reliability before policy execution. |
 
 ## Next Upgrade Before Submission
 

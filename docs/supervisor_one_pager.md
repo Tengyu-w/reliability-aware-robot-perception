@@ -57,8 +57,21 @@ review.
 - Runtime assurance: auditable state machine and route policy.
 - Embodied AI / safe RL: risk scores as recovery triggers, rollout filters, or
   constraints.
-- Surgical autonomy / VPPV: optional transfer case for visual-state reliability
+- Surgical autonomy / VPPV: application case for visual-state reliability
   before policy execution.
+
+## VPPV-Style Application Case
+
+For surgical autonomy supervisors, the project can be framed as a front-end
+reliability layer for VPPV-style systems. The monitor watches whether depth,
+visual parsing, perceptual state regression, physical/task progress, and
+trajectory outcome evidence are stable enough for a downstream policy to trust.
+
+The most relevant result is the local temporal reliability finding: in surgical
+scenes, motion is normal, so a global clean reference is not enough. The monitor
+checks whether the current state change is abnormal relative to a local temporal
+window and then routes the autonomy stack to continue, re-perceive, recover, or
+request human review.
 
 ## Limitations
 

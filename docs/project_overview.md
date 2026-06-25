@@ -64,6 +64,28 @@ flowchart LR
 - Action-outcome residuals extend the project from perception to execution.
 - A VPPV-style surgical autonomy front end is one credible transfer target.
 
+## VPPV-Style Transfer Case
+
+The VPPV-style section is used to demonstrate how the same reliability monitor
+would attach to a policy-driven surgical autonomy pipeline. The mapping is:
+
+```mermaid
+flowchart LR
+    A["Visual parsing / segmentation"] --> E["visual_state_risk"]
+    B["Depth map"] --> E
+    C["Perceptual regressed state"] --> E
+    D["Physical / progress state"] --> E
+    E --> F["NORMAL: continue"]
+    E --> G["SUSPECT: re-perceive"]
+    E --> H["RECOVER: replan or backup"]
+    E --> I["HUMAN_REVIEW: operator check"]
+```
+
+This transfer is academically useful because it preserves the broad method
+while showing a concrete high-stakes use case. It also gives a careful claim:
+the monitor is VPPV-compatible in spirit, but it is not a VPPV reproduction and
+has not yet been validated on paired surgical policy rollouts.
+
 ## What It Does Not Prove
 
 - It does not prove closed-loop robot safety.

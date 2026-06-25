@@ -21,6 +21,30 @@ the project. This keeps the work usable for supervisors in reliable robot
 perception, trustworthy ML, embodied AI, safe RL, medical robotics, and surgical
 autonomy.
 
+## Surgical Autonomy Transfer: VPPV-Style Front-End Monitoring
+
+The surgical transfer case is intentionally more than a brief mention. VPPV-style
+autonomy relies on a visual front end that can include segmentation masks, depth
+maps, perceptual state regressors, and physical state vectors. If those states
+are unstable or corrupted, a downstream policy may execute from the wrong state.
+
+This project maps its general reliability monitor onto that setting:
+
+| VPPV-style front-end dependency | Monitor evidence in this project |
+|---|---|
+| Depth map | depth validity, mean depth, depth variance, depth corruption score |
+| Perceptual state / embedding | embedding shift and local temporal state change |
+| Physical or task progress state | progress slope and progress stagnation score |
+| Action outcome consistency | trajectory residual between planned and observed motion |
+| Runtime autonomy decision | `NORMAL`, `SUSPECT`, `RECOVER`, `HUMAN_REVIEW` route states |
+
+The main surgical insight is that reliability should not be judged only by
+distance from a global clean reference. In laparoscopic or robot-assisted scenes,
+camera motion, tool motion, and tissue motion can be normal. The monitor instead
+asks whether the current visual-state change exceeds the normal variation inside
+a local time window. This is why the VPPV-style case is a strong application of
+the broader temporal reliability idea, while the project title remains general.
+
 ## Reading Guide
 
 | Document | Purpose |
@@ -30,7 +54,7 @@ autonomy.
 | [`docs/project_overview.md`](docs/project_overview.md) | Technical overview of the research question and pipeline |
 | [`docs/application_evidence_pack.md`](docs/application_evidence_pack.md) | Compact evidence summary for supervisors or reviewers |
 | [`docs/VISUAL_EVIDENCE_INDEX.md`](docs/VISUAL_EVIDENCE_INDEX.md) | Public figure and table index |
-| [`reports/vppv_perception_reliability_monitor.md`](reports/vppv_perception_reliability_monitor.md) | Surgical autonomy transfer case |
+| [`reports/vppv_perception_reliability_monitor.md`](reports/vppv_perception_reliability_monitor.md) | Detailed VPPV-style surgical autonomy transfer case |
 | [`docs/experiment_order.md`](docs/experiment_order.md) | Recommended order for reading and rerunning the experiments |
 | [`docs/limitations.md`](docs/limitations.md) | Scope, limitations, and next validation steps |
 | [`modules/readme.md`](modules/readme.md) | Code map by experimental component |

@@ -61,6 +61,27 @@ whether the current visual state change exceeds normal variation inside a local
 temporal window. This turns the project into a reliability monitor for dynamic
 visual state, rather than only a generic corruption detector.
 
+## VPPV-Style Surgical Transfer
+
+The VPPV-style section is the strongest domain-specific application of the
+project. It connects the general monitor to a surgical autonomy stack whose
+front end depends on visual parsing, depth maps, perceptual state regression,
+and physical state vectors. The project contributes a companion reliability
+monitor rather than a replacement for those modules.
+
+In this transfer case, `visual_state_risk` is used as a decision-facing signal:
+
+- `NORMAL`: visual state appears stable enough for continued policy execution.
+- `SUSPECT`: visual state is questionable; slow down or re-perceive.
+- `RECOVER`: visual abnormality may affect execution; recover, replan, or use
+  backup behavior.
+- `HUMAN_REVIEW`: state cannot be confirmed; request operator review.
+
+The current evidence supports this mapping with risk distillation, feature
+attribution, signal-group ablation, route-state counts, and trajectory-residual
+correlation. The limitation is also explicit: these are VPPV-style proxy labels,
+not paired VPPV policy rollouts.
+
 ## Limitations
 
 - Controlled corruptions are not equivalent to natural robot failures.
@@ -69,8 +90,8 @@ visual state, rather than only a generic corruption detector.
 - Runtime monitor states are transparent engineering rules, not formal safety
   guarantees.
 - The trajectory residual benchmark is synthetic.
-- The VPPV-style section is an application transfer case, not a claim that this
-  project reproduces or renames VPPV.
+- The VPPV-style section is a substantial application transfer case, not a
+  claim that this project reproduces or renames VPPV.
 - Stronger pretrained RGB-D descriptors and task-native failure labels are
   needed before making broad real-world claims.
 
