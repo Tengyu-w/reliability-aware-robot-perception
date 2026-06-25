@@ -4,20 +4,29 @@
 
 One-page summary: `docs/supervisor_one_pager.md`.
 
-This project now frames the RGB-D reliability work as a VPPV-style visual-front-end monitor for surgical autonomy. The central question is whether depth, temporal, embedding, trajectory, calibration, and coverage-risk evidence can identify unreliable visual state before a downstream policy is trusted.
+This project is a reliability-aware robot perception prototype. It begins with
+CNN-LSTM sequential perception, then develops RGB-D/depth reliability,
+temporal-state diagnostics, calibration checks, and trajectory residual
+monitoring. The central question is whether visual evidence can identify an
+unreliable state before a downstream robot policy is trusted.
+
+The VPPV-style surgical autonomy material is kept as a transfer case, not as
+the overall project name.
 
 ## Evidence Layers
 
 | Layer | What it demonstrates | Current status |
 |---|---|---|
-| VPPV perception monitor | Visual-state risk distillation and runtime route policy | Implemented in `modules/run_vppv_perception_monitor.py` |
 | Video action recognition | Sequential perception embeddings and action-class reliability | Implemented in `modules/main.py` and `modules/embedding_analysis.py` |
 | Synthetic 3D perception | Depth-to-point-cloud embedding reliability under controlled corruptions | Implemented and runnable |
 | Real depth workflow | Public depth-map preparation, profiling, and corruption benchmark | Implemented; TUM RGB-D sample run completed in current outputs |
+| Temporal reliability | Local-window state-change scoring under camera motion | Implemented for TUM RGB-D |
+| Runtime risk monitor | Visual-state risk distillation and route-state policy | Implemented in `modules/run_vppv_perception_monitor.py` |
+| Surgical autonomy transfer | VPPV-style front-end reliability mapping | Implemented as an application case |
 
 ## Current 3D Reliability Results
 
-### VPPV-Style Perception Monitor
+### Visual-State Risk Distillation
 
 - Samples: 1800
 - Distilled risk output: `visual_state_risk`
@@ -28,7 +37,9 @@ This project now frames the RGB-D reliability work as a VPPV-style visual-front-
 - Spearman risk vs trajectory residual: 0.543
 - Spearman risk vs temporal excess: 0.521
 - Top 10% risk captures RECOVER/HUMAN_REVIEW states: 1.000
-- Interpretation: the monitor provides a VPPV-facing front-end reliability score and maps high-risk visual states to re-perception, recovery, replanning, or human review.
+- Interpretation: the monitor provides a front-end reliability score and maps
+  high-risk visual states to re-perception, recovery, replanning, or human
+  review.
 
 ### Multi-Seed Synthetic Depth Benchmark
 
@@ -61,7 +72,9 @@ This project now frames the RGB-D reliability work as a VPPV-style visual-front-
 - Global Spearman rotation vs embedding shift: 0.061
 - Grid Spearman translation vs embedding shift: -0.064
 - Grid Spearman rotation vs embedding shift: 0.275
-- Interpretation: local grid descriptors improve rotation sensitivity over global statistics, but neither descriptor is sufficient as a full SLAM-aware representation.
+- Interpretation: local grid descriptors improve rotation sensitivity over
+  global statistics, but neither descriptor is sufficient as a full SLAM-aware
+  representation.
 
 ### TUM RGB-D Learned PCA Depth Descriptor Baseline
 
@@ -70,7 +83,8 @@ This project now frames the RGB-D reliability work as a VPPV-style visual-front-
 - Explained variance ratio: 0.956
 - Spearman translation vs embedding shift: 0.167
 - Spearman rotation vs embedding shift: 0.540
-- Interpretation: a lightweight learned depth descriptor tracks camera rotation better than hand-crafted global/grid descriptors.
+- Interpretation: a lightweight learned depth descriptor tracks camera rotation
+  better than hand-crafted global/grid descriptors.
 
 ### Runtime Assurance Monitor
 
@@ -80,7 +94,8 @@ This project now frames the RGB-D reliability work as a VPPV-style visual-front-
 - RECOVER: 27
 - HUMAN_REVIEW: 0
 - Safety-property violations: 0
-- Interpretation: reliability scores are converted into auditable autonomy states.
+- Interpretation: reliability scores are converted into auditable autonomy
+  states.
 
 ### Reliability Score Calibration
 
@@ -91,7 +106,8 @@ This project now frames the RGB-D reliability work as a VPPV-style visual-front-
 - Risk at full coverage: 0.833
 - Risk at 80% coverage: 0.792
 - Risk at 50% coverage: 0.667
-- Interpretation: the score ranks corruptions well, but raw normalized scores are not probability-calibrated.
+- Interpretation: the score ranks corruptions well, but raw normalized scores
+  are not probability-calibrated.
 
 ### Trajectory Residual Reliability Demo
 
@@ -99,7 +115,8 @@ This project now frames the RGB-D reliability work as a VPPV-style visual-front-
 - Failure types: normal, drift, oscillation, jump, stuck
 - ROC-AUC: 0.990
 - Average precision: 0.998
-- Interpretation: planned-vs-observed trajectory residuals provide a control-facing action-outcome reliability score.
+- Interpretation: planned-vs-observed trajectory residuals provide a
+  control-facing action-outcome reliability score.
 
 ### Trajectory Runtime Monitor
 
@@ -117,34 +134,49 @@ This project now frames the RGB-D reliability work as a VPPV-style visual-front-
 
 | Supervisor direction | Matching evidence |
 |---|---|
-| VPPV surgical autonomy | Visual-state risk distillation, route policy, and runtime state machine |
+| Reliable robot perception | RGB-D/depth reliability, temporal state-change analysis, runtime monitor |
 | Trustworthy ML / calibration / robustness | Embedding risk, uncertainty scores, selective prediction, multi-seed reporting |
 | Human-robot collaboration / industrial AI | Action recognition reliability and 3D perception screening around tools/workcells |
 | Reliable 3D scene understanding | Depth-to-point-cloud embeddings and corruption detection |
 | Embodied navigation / autonomous systems | Perception risk as a trigger for abstention, fallback, or human review |
 | Medical or clinical trustworthy AI | ECG reliability project plus transferable reliability methodology |
+| Surgical autonomy / VPPV | Optional transfer case for front-end visual-state reliability |
 
 ## What Is Shown
 
-- The project has a working VPPV-style monitor that turns RGB-D reliability and trajectory evidence into `visual_state_risk`.
-- The monitor includes feature attribution, signal-group ablation, top-risk case explanations, route policy, and outcome-linked validation.
 - The project has working code for video embeddings and 3D geometry embeddings.
-- The 3D module can detect controlled perception corruptions using embedding-distance risk.
-- TUM RGB-D results show that naive global/local distance can fail under camera motion, motivating temporal excess scoring.
-- Pose-aware analysis shows a limitation: hand-crafted descriptors only weakly track frame-to-frame camera motion, though local grids improve rotation sensitivity.
-- A lightweight learned PCA depth descriptor improves pose-motion sensitivity, especially for rotation.
-- Runtime monitoring converts reliability scores into NORMAL/SUSPECT/RECOVER/HUMAN_REVIEW decisions with a simple property check.
+- The 3D module can detect controlled perception corruptions using
+  embedding-distance risk.
+- TUM RGB-D results show that naive global/local distance can fail under camera
+  motion, motivating temporal excess scoring.
+- Pose-aware analysis shows a limitation: hand-crafted descriptors only weakly
+  track frame-to-frame camera motion, though local grids improve rotation
+  sensitivity.
+- A lightweight learned PCA depth descriptor improves pose-motion sensitivity,
+  especially for rotation.
+- Runtime monitoring converts reliability scores into
+  NORMAL/SUSPECT/RECOVER/HUMAN_REVIEW decisions with a simple property check.
 - Calibration analysis separates risk ranking from probability calibration.
-- Trajectory residual analysis extends the project from perception reliability to action-outcome reliability.
-- The workflow records data preparation and supports mean/std reporting across seeds.
+- Trajectory residual analysis extends the project from perception reliability
+  to action-outcome reliability.
+- The surgical transfer case turns RGB-D reliability and trajectory evidence
+  into `visual_state_risk` with attribution, ablation, route policy, and
+  outcome-linked validation.
 
 ## What Remains Unproven
 
-- These results are not closed-loop VPPV or surgical robot validation.
-- Segmentation-mask reliability and perceptual regressor error are not yet directly measured.
-- Synthetic or controlled corruptions do not replace dataset-native failure labels.
-- Public-data results should be added before making strong claims about real-world robot perception.
+- These results are not closed-loop robot validation.
+- The surgical transfer case is not a reproduction of VPPV.
+- Segmentation-mask reliability and perceptual regressor error are not yet
+  directly measured.
+- Synthetic or controlled corruptions do not replace dataset-native failure
+  labels.
+- Public-data results should be expanded before making strong claims about
+  real-world robot perception.
 
 ## Next Experiment
 
-Replace proxy residuals with VPPV simulator rollouts, segmentation-mask quality, surgical-tool tracking, or perceptual regressor errors; then evaluate whether `visual_state_risk` predicts downstream policy failures.
+Replace proxy residuals with task-native evidence: robot-log failures, SLAM
+tracking quality, simulator rollouts, segmentation quality, surgical-tool
+tracking, or perceptual regressor errors. Then evaluate whether
+`visual_state_risk` predicts downstream policy failures.

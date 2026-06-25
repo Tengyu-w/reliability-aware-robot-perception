@@ -1,4 +1,8 @@
-# Perception-State Reliability Monitor for VPPV-Style Surgical Autonomy
+# Surgical-Autonomy Transfer Case: Perception-State Reliability Monitor
+
+This report is an application case for a VPPV-style surgical autonomy front
+end. It is not the overall project title and does not claim to reproduce VPPV.
+The broader project is reliability-aware sequential robot perception.
 
 Chinese title: 面向 VPPV 手术自主系统的感知状态可靠性监控器
 

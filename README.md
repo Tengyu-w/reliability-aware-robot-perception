@@ -1,21 +1,25 @@
-# VPPV-Style Perception Reliability Monitor
+# Reliability-Aware Sequential Robot Perception
 
-This repository is a research prototype for monitoring whether the visual front
-end of a VPPV-style surgical autonomy system is reliable enough for downstream
-policy execution. The original RGB-D/depth and point-cloud reliability work is
-now reframed as evidence for a VPPV perception reliability monitor over visual
-parsing, depth, perceptual state regression, physical state, and action outcome
-consistency.
+This repository is a research prototype for reliability monitoring in robot
+perception. The project starts from a CNN-LSTM video/action recognition baseline,
+then moves into temporal reliability and waveform-like state-change analysis,
+and finally shows how the same monitor can be transferred to a surgical autonomy
+front end such as a VPPV-style pipeline.
 
 The central question is:
 
-> When should a VPPV-style autonomy pipeline stop trusting its current visual
-> state and trigger re-perception, recovery, replanning, or human review?
+> When should a robot stop trusting its current visual state and trigger
+> re-perception, recovery, replanning, or human review?
 
-The key upgrade is `visual_state_risk`: a distilled risk score learned from
-depth, temporal, embedding, trajectory, calibration, and coverage-risk signals.
-It is mapped into auditable runtime states: `NORMAL`, `SUSPECT`, `RECOVER`, and
-`HUMAN_REVIEW`.
+The main contribution is `visual_state_risk`: a lightweight risk score distilled
+from depth, temporal, embedding, trajectory, calibration, and coverage-risk
+signals. It is mapped into auditable runtime states: `NORMAL`, `SUSPECT`,
+`RECOVER`, and `HUMAN_REVIEW`.
+
+VPPV is treated here as one downstream application context, not as the name of
+the project. This keeps the work usable for supervisors in reliable robot
+perception, trustworthy ML, embodied AI, safe RL, medical robotics, and surgical
+autonomy.
 
 ## Reading Guide
 
@@ -23,35 +27,36 @@ It is mapped into auditable runtime states: `NORMAL`, `SUSPECT`, `RECOVER`, and
 |---|---|
 | [`docs/APPLICATION_INDEX.md`](docs/APPLICATION_INDEX.md) | Supervisor-facing entry point for PhD applications |
 | [`docs/phd_application_project_brief.md`](docs/phd_application_project_brief.md) | Concise project brief with fit, evidence, and limits |
-| [`reports/vppv_perception_reliability_monitor.md`](reports/vppv_perception_reliability_monitor.md) | VPPV-style perception-state reliability monitor report |
-| [`docs/project_overview.md`](docs/project_overview.md) | Short technical overview of the research question and pipeline |
+| [`docs/project_overview.md`](docs/project_overview.md) | Technical overview of the research question and pipeline |
 | [`docs/application_evidence_pack.md`](docs/application_evidence_pack.md) | Compact evidence summary for supervisors or reviewers |
+| [`docs/VISUAL_EVIDENCE_INDEX.md`](docs/VISUAL_EVIDENCE_INDEX.md) | Public figure and table index |
+| [`reports/vppv_perception_reliability_monitor.md`](reports/vppv_perception_reliability_monitor.md) | Surgical autonomy transfer case |
 | [`docs/experiment_order.md`](docs/experiment_order.md) | Recommended order for reading and rerunning the experiments |
 | [`docs/limitations.md`](docs/limitations.md) | Scope, limitations, and next validation steps |
 | [`modules/readme.md`](modules/readme.md) | Code map by experimental component |
 
 ## What This Project Does
 
-1. Treats RGB-D/depth reliability as the visual-front-end monitor for a
-   VPPV-style surgical autonomy stack.
-2. Distills depth, temporal, embedding, trajectory, calibration, and
-   coverage-risk signals into `visual_state_risk`.
-3. Tests the negative result that global clean-reference distance fails under
-   normal camera motion, while local temporal excess is more meaningful.
-4. Adds feature attribution, signal-group ablation, high-risk case
-   explanations, and VPPV route evaluation.
-5. Converts reliability scores into auditable runtime states:
-   `NORMAL`, `SUSPECT`, `RECOVER`, and `HUMAN_REVIEW`.
-6. Keeps the earlier CNN-LSTM, RGB-D, calibration, and trajectory residual
-   experiments as supporting evidence for the monitor.
+1. Starts from a CNN-LSTM sequential perception baseline.
+2. Studies whether visual embeddings and temporal state changes can expose
+   unreliable perception.
+3. Tests RGB-D/depth reliability under controlled corruption and camera motion.
+4. Shows a key negative result: global clean-reference distance can fail under
+   normal camera motion.
+5. Uses local temporal normalization and waveform-like excess scores to detect
+   abnormal state changes.
+6. Distills multiple reliability signals into `visual_state_risk`.
+7. Converts risk scores into auditable runtime states for robot autonomy.
+8. Demonstrates a surgical autonomy transfer case where the monitor can sit
+   beside a VPPV-style visual front end.
 
 ## Key Results
 
 | Evidence layer | Setup | Result | Interpretation |
 |---|---:|---:|---|
-| VPPV risk distillation | 1800 aligned visual/action samples | Random Forest teacher ROC-AUC 0.992 | Lightweight `visual_state_risk` approximates heavier reliability evidence |
-| VPPV runtime states | Distilled risk trace | 1350 NORMAL / 433 SUSPECT / 17 RECOVER / 0 HUMAN_REVIEW | Visual-state risk becomes concrete autonomy routing |
-| VPPV outcome link | Distilled risk vs residual signals | top 10% risk captures 100% RECOVER/HUMAN_REVIEW | Risk is decision-relevant, not only a teacher-fitting score |
+| Risk distillation | 1800 aligned visual/action samples | Random Forest teacher ROC-AUC 0.992 | Lightweight `visual_state_risk` approximates heavier reliability evidence |
+| Runtime route states | Distilled risk trace | 1350 NORMAL / 433 SUSPECT / 17 RECOVER / 0 HUMAN_REVIEW | Visual risk becomes concrete autonomy routing |
+| Outcome link | Distilled risk vs residual signals | top 10% risk captures 100% RECOVER/HUMAN_REVIEW | Risk is decision-relevant, not only a teacher-fitting score |
 | Synthetic 3D reliability | 3 seeds, 8 samples per scene | ROC-AUC 0.804 +/- 0.028 | Embedding risk gives a reproducible smoke-test signal |
 | TUM RGB-D corruption | 300 depth files, 1800 samples | source-paired ROC-AUC 1.000 | Controlled depth corruptions are detectable |
 | TUM scene-conditioned baseline | Same TUM run | ROC-AUC 0.483 | Global clean references fail under camera motion |
@@ -71,17 +76,17 @@ The CSV version of this table is in
 These figures are copied from local experiment outputs so the repository can
 show representative evidence without committing the full `outputs/` directory.
 
-| VPPV monitor architecture | VPPV visual dashboard |
+| Reliability monitor architecture | Visual risk dashboard |
 |---|---|
-| ![VPPV monitor architecture](docs/figures/vppv_monitor_architecture.png) | ![VPPV visual dashboard](docs/figures/vppv_visual_dashboard.png) |
+| ![Reliability monitor architecture](docs/figures/vppv_monitor_architecture.png) | ![Visual risk dashboard](docs/figures/vppv_visual_dashboard.png) |
 
 | Feature attribution | Signal-group ablation |
 |---|---|
-| ![VPPV feature importance](docs/figures/vppv_feature_importance.png) | ![VPPV signal group ablation](docs/figures/vppv_signal_group_ablation.png) |
+| ![Feature importance](docs/figures/vppv_feature_importance.png) | ![Signal group ablation](docs/figures/vppv_signal_group_ablation.png) |
 
 | Route policy | Risk trace |
 |---|---|
-| ![VPPV route policy flow](docs/figures/vppv_route_policy_flow.png) | ![VPPV risk trace](docs/figures/vppv_risk_trace.png) |
+| ![Route policy flow](docs/figures/vppv_route_policy_flow.png) | ![Risk trace](docs/figures/vppv_risk_trace.png) |
 
 | Temporal reliability | Runtime monitoring |
 |---|---|
@@ -107,7 +112,7 @@ modules/
   run_tum_pose_embedding_analysis.py   # Global/grid descriptor pose analysis
   run_tum_pca_depth_descriptor.py      # PCA depth descriptor baseline
   runtime_monitor.py                   # Runtime state monitor
-  run_vppv_perception_monitor.py       # VPPV visual-state risk distillation and routing
+  run_vppv_perception_monitor.py       # Surgical-autonomy transfer case
   calibration_analysis.py              # Calibration and coverage-risk analysis
   trajectory_residual_demo.py          # Action-outcome residual reliability demo
 ```
@@ -164,7 +169,8 @@ not tracked by Git. See [`data/README.md`](data/README.md).
 
 ## Evidence Pack
 
-After running experiments, rebuild the VPPV monitor report with:
+After running experiments, rebuild the surgical-autonomy transfer report and
+visual gallery with:
 
 ```bash
 python modules/run_vppv_perception_monitor.py
@@ -172,7 +178,8 @@ python tools/generate_vppv_visual_gallery.py
 ```
 
 The public snapshot tables are stored in `docs/tables/vppv_*.csv` and
-`docs/tables/vppv_risk_outcome_correlation.json`.
+`docs/tables/vppv_risk_outcome_correlation.json`. The `vppv_` prefix marks the
+transfer case artifact names, not the overall project name.
 
 Dataset card drafts are provided for TUM RGB-D, NYU Depth V2, KITTI depth, and
 SUN RGB-D under [`docs/dataset_cards/`](docs/dataset_cards/).

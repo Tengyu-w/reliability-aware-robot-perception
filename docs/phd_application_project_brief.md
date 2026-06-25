@@ -2,44 +2,46 @@
 
 ## Title
 
-VPPV-Style Perception Reliability Monitor for Surgical Autonomy
+Reliability-Aware Sequential Robot Perception
 
 ## One-Paragraph Summary
 
-This project studies when the visual front end of a VPPV-style surgical
-autonomy system should not be trusted. It upgrades an RGB-D/depth reliability
-workflow into a monitor for visual parsing, depth, perceptual state regression,
-physical state evidence, and downstream trajectory consistency. The monitor
-distills depth, temporal, embedding, trajectory, calibration, and coverage-risk
-signals into `visual_state_risk`, then routes the system to continue,
-re-perceive, recover, replan, or request human review.
+This project studies when a robot should stop trusting its current visual
+state. It starts from CNN-LSTM sequential perception, then develops RGB-D/depth
+reliability analysis, temporal state-change diagnostics, and waveform-like
+excess scoring. These signals are distilled into a lightweight
+`visual_state_risk` score that can route the system to continue, re-perceive,
+recover, replan, or request human review. A VPPV-style surgical autonomy front
+end is included as one transfer case, not as the overall project identity.
 
 ## Research Motivation
 
-VPPV-style autonomy depends on visual parsing, depth, perceptual regressors, and
-physical state vectors. If those front-end states are unreliable, the downstream
-policy can be driven by the wrong state. A useful autonomy stack should
-therefore monitor not only what it sees, but also whether the current visual
-state is stable enough for policy execution.
+Robot learning systems often treat perception outputs as clean state inputs.
+However, visual embeddings, depth maps, and regressed states can become
+unreliable under corruption, camera motion, occlusion, calibration drift, or
+action-outcome mismatch. A useful autonomy stack should monitor not only what
+it sees, but also whether the current visual state is stable enough for policy
+execution.
 
 ## Method Overview
 
 The project has six technical layers:
 
-1. Sequential video action baseline and embedding diagnostics.
+1. CNN-LSTM sequential video/action baseline and embedding diagnostics.
 2. Synthetic depth/point-cloud corruption reliability tests.
 3. TUM RGB-D corruption and temporal reliability benchmarks.
 4. Pose-aware descriptor comparison: global, local-grid, and PCA depth
    descriptors.
-5. VPPV visual-state risk distillation with feature attribution and
-   signal-group ablation.
-6. Runtime route policy and trajectory residual monitoring.
+5. Visual-state risk distillation with feature attribution and signal-group
+   ablation.
+6. Runtime route policy, trajectory residual monitoring, and surgical-front-end
+   transfer.
 
 ## Key Evidence
 
 | Component | Evidence |
 |---|---|
-| VPPV risk distillation | Random Forest teacher ROC-AUC 0.992 |
+| Visual-state risk distillation | Random Forest teacher ROC-AUC 0.992 |
 | Runtime route states | 1350 NORMAL / 433 SUSPECT / 17 RECOVER / 0 HUMAN_REVIEW |
 | Outcome-linked validation | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW states |
 | Feature attribution | embedding_shift, trajectory_residual, and progress_slope dominate the student model |
@@ -52,37 +54,45 @@ The project has six technical layers:
 
 ## Strongest Current Result
 
-The strongest research message is that VPPV visual reliability cannot be judged
-only by distance from a global clean reference. In surgery, camera, tool, and
-tissue motion are normal. The monitor should ask whether the current visual
-state change exceeds the normal variation in a local temporal window. This
-turns the project into a VPPV front-end reliability monitor rather than a
-generic RGB-D corruption detector.
+The strongest research message is that visual reliability cannot be judged only
+by distance from a global clean reference. In robot perception, normal camera
+and scene motion can make a global reference misleading. The monitor should ask
+whether the current visual state change exceeds normal variation inside a local
+temporal window. This turns the project into a reliability monitor for dynamic
+visual state, rather than only a generic corruption detector.
 
 ## Limitations
 
 - Controlled corruptions are not equivalent to natural robot failures.
-- Current labels are VPPV-style proxies, not paired surgical policy rollouts.
-- Segmentation-mask reliability is framed as a VPPV dependency but is not yet
-  directly measured.
+- Current labels are proxy reliability labels, not paired closed-loop robot
+  rollouts.
 - Runtime monitor states are transparent engineering rules, not formal safety
   guarantees.
 - The trajectory residual benchmark is synthetic.
+- The VPPV-style section is an application transfer case, not a claim that this
+  project reproduces or renames VPPV.
 - Stronger pretrained RGB-D descriptors and task-native failure labels are
   needed before making broad real-world claims.
 
 ## Suitable Application Framing
 
-> I developed a VPPV-style visual-front-end reliability monitor for surgical
-> autonomy. The project uses depth validity, temporal visual change, embedding
-> shift, calibration-style evidence, and trajectory residuals to decide whether
-> the system should continue policy execution, re-perceive, recover, replan, or
-> request human review.
+> I developed a reliability-aware sequential robot perception monitor. The
+> project starts from CNN-LSTM visual sequence modeling, then studies RGB-D
+> state reliability and local temporal state changes, and finally distills
+> these signals into a runtime risk score for re-perception, recovery,
+> replanning, or human review.
+
+For surgical robotics only:
+
+> As one transfer case, I apply the same monitor to a VPPV-style surgical
+> autonomy front end, where unreliable depth, visual parsing, perceptual state
+> regression, or trajectory consistency could mislead a downstream policy.
 
 ## What I Would Improve Next
 
-1. Evaluate the monitor against VPPV simulator rollouts or surgical-tool logs.
+1. Evaluate the monitor against task-native robot logs, simulator rollouts, or
+   surgical-tool logs.
 2. Replace PCA with a stronger pretrained depth/RGB-D encoder.
-3. Add SLAM tracking quality, pose error, or surgical-tool tracking as
-   task-native reliability labels.
+3. Add SLAM tracking quality, pose error, segmentation quality, or tool-state
+   tracking as task-native reliability labels.
 4. Measure human-review or replanning burden, not only ROC-AUC.

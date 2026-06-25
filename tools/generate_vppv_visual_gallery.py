@@ -1,4 +1,4 @@
-"""Generate visual gallery figures for the VPPV perception monitor."""
+"""Generate visual gallery figures for the reliability monitor transfer case."""
 
 from pathlib import Path
 import json
@@ -34,7 +34,7 @@ def save_architecture_diagram(path: Path):
     fig, ax = plt.subplots(figsize=(12, 6.2))
     ax.axis("off")
     boxes = [
-        ("VPPV visual front end\nsegmentation mask\ndepth map\nregressed state\nphysical state", 0.05, 0.62, 0.28, 0.32, "#d9ecff"),
+        ("Visual front end\nsegmentation / mask\ndepth map\nregressed state\nphysical state", 0.05, 0.62, 0.28, 0.32, "#d9ecff"),
         ("Reliability signals\ndepth corruption\ntemporal excess\nembedding shift\ntrajectory residual\ncalibration gap", 0.38, 0.62, 0.24, 0.32, "#e8f5e9"),
         ("Distilled model\nLogistic Regression\nRandom Forest\nDecision Tree\noutput: visual_state_risk", 0.68, 0.62, 0.24, 0.32, "#fff3cd"),
         ("Runtime routes\nNORMAL: continue\nSUSPECT: re-perceive\nRECOVER: replan / backup\nHUMAN_REVIEW: surgeon review", 0.38, 0.14, 0.54, 0.28, "#f8d7da"),
@@ -49,7 +49,7 @@ def save_architecture_diagram(path: Path):
     ax.text(
         0.5,
         0.04,
-        "Core idea: unreliable visual state triggers re-perception, recovery, or human review before the downstream VPPV policy is misled.",
+        "Core idea: unreliable visual state triggers re-perception, recovery, or human review before a downstream robot policy is misled.",
         ha="center",
         va="center",
         fontsize=11,
@@ -94,7 +94,7 @@ def save_dashboard(feature: pd.DataFrame, ablation: pd.DataFrame, state_counts: 
     axes[3].set_ylabel("Spearman rho")
     axes[3].set_ylim(-0.2, 0.7)
 
-    fig.suptitle("VPPV Perception-State Monitor: What Is Visible At A Glance", fontsize=16)
+    fig.suptitle("Sequential Perception Reliability Monitor: Evidence At A Glance", fontsize=16)
     fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(path, dpi=220, bbox_inches="tight")
     plt.close(fig)
@@ -120,7 +120,7 @@ def save_route_policy_flow(state_counts: pd.DataFrame, route_policy: pd.DataFram
         ax.text(x + 0.10, 0.42, action, ha="center", va="center", fontsize=10, wrap=True)
         if idx < 3:
             ax.annotate("", xy=(x + 0.235, 0.52), xytext=(x + 0.205, 0.52), arrowprops=dict(arrowstyle="->", lw=1.7))
-    ax.text(0.5, 0.15, "High-risk visual state is mapped to a concrete VPPV action.", ha="center", fontsize=12)
+    ax.text(0.5, 0.15, "High-risk visual state is mapped to a concrete autonomy action.", ha="center", fontsize=12)
     fig.tight_layout()
     fig.savefig(path, dpi=220, bbox_inches="tight")
     plt.close(fig)
