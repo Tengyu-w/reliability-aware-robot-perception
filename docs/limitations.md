@@ -15,6 +15,9 @@ only one transfer case.
   separate abnormal visual changes from normal scene/camera movement.
 - Multiple reliability signals can be distilled into a lightweight
   `visual_state_risk` score.
+- The scalar score can be upgraded into mechanism-separated routing that
+  distinguishes boundary-first visual-state risk from residual trajectory,
+  depth/signal, representation, and progress/calibration mechanisms.
 - The score can be mapped into auditable runtime states:
   `NORMAL`, `SUSPECT`, `RECOVER`, and `HUMAN_REVIEW`.
 
@@ -33,6 +36,9 @@ only one transfer case.
   a new VPPV method. It is a compatibility/application framing.
 - Runtime route rules are transparent engineering rules, not formal safety
   guarantees.
+- Mechanism-routing scores are currently rule-based and validation-oriented.
+  They should be tuned and tested against task-native failure labels before
+  being presented as an operational router.
 
 ## Main Evidence Risk
 

@@ -8,13 +8,15 @@ project. The research path is:
 3. RGB-D/depth reliability under corruption and camera motion.
 4. Waveform-like temporal excess analysis for abnormal state changes.
 5. Runtime risk distillation and route-state monitoring.
-6. Optional transfer to surgical autonomy front ends such as VPPV-style systems.
+6. Mechanism-separated hierarchical routing with a reserved residual budget.
+7. Optional transfer to surgical autonomy front ends such as VPPV-style systems.
 
 ## Core Question
 
 Can depth, temporal, embedding, trajectory, calibration, and coverage-risk
-signals be distilled into a lightweight `visual_state_risk` score that tells a
-robot when to continue, re-perceive, recover, replan, or request human review?
+signals be distilled into a lightweight `visual_state_risk` score and then
+separated into mechanism-specific routes that tell a robot when to continue,
+re-perceive, recover, replan, or request human review?
 
 ## Pipeline
 
@@ -24,13 +26,15 @@ flowchart LR
     B --> C["RGB-D / depth reliability"]
     C --> D["Temporal waveform-like excess analysis"]
     D --> E["Risk distillation"]
-    E --> F["Runtime state machine"]
-    F --> G["Application transfer"]
+    E --> F["Mechanism-separated routing"]
+    F --> H["Runtime state machine"]
+    H --> G["Application transfer"]
 
     C --> C1["TUM RGB-D corruption benchmark"]
     D --> D1["Global / grid / PCA descriptor comparison"]
     E --> E1["visual_state_risk"]
-    F --> F1["NORMAL / SUSPECT / RECOVER / HUMAN_REVIEW"]
+    F --> F1["boundary-first / reserved residual budget"]
+    H --> H1["NORMAL / SUSPECT / RECOVER / HUMAN_REVIEW"]
     G --> G1["Trajectory residual and surgical-front-end case"]
 ```
 
@@ -41,6 +45,7 @@ flowchart LR
 | Risk distillation | 1800 aligned visual/action samples | Random Forest teacher ROC-AUC 0.992 | Depth/temporal/embedding/trajectory evidence becomes `visual_state_risk` |
 | Route evaluation | Distilled risk states | 1350 NORMAL, 433 SUSPECT, 17 RECOVER, 0 HUMAN_REVIEW | Risk maps to concrete autonomy actions |
 | Outcome-linked validation | Risk vs downstream signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | The score is decision-relevant, not only a teacher fit |
+| Mechanism router | VPPV risk trace | 20% budget captures 66.7% teacher high-risk and 76.5% RECOVER/HUMAN_REVIEW | Scalar risk becomes mechanism-specific routing |
 | Synthetic 3D reliability | Synthetic depth corruptions | ROC-AUC 0.804 +/- 0.028 | Smoke evidence for embedding-risk scoring |
 | TUM RGB-D corruption | 300 depth files, 1800 samples | source-paired ROC-AUC 1.000 | Controlled corruptions are detectable |
 | TUM scene-conditioned baseline | Same TUM run | ROC-AUC 0.483 | Global clean references fail under camera motion |
@@ -58,6 +63,9 @@ flowchart LR
   robot perception, not as a project named after one surgical framework.
 - `visual_state_risk` distills heavier reliability evidence into a lightweight
   runtime score.
+- Mechanism-separated routing keeps embedding, temporal, depth, trajectory, and
+  progress evidence as different failure signals rather than collapsing every
+  case into one undifferentiated review bucket.
 - Naive embedding distance can fail under normal camera motion.
 - Local and learned descriptors improve pose-awareness, especially for rotation.
 - Reliability scores can be converted into runtime states and recovery actions.
@@ -104,6 +112,7 @@ has not yet been validated on paired surgical policy rollouts.
 | Runtime assurance / formal methods | `docs/application_evidence_pack.md`, runtime monitor section |
 | Embodied AI / navigation | Temporal state-change and route-state sections |
 | Transferability estimation | Descriptor comparison: global -> grid -> PCA |
+| Mechanism-routing upgrade | `docs/mechanism_separated_routing_upgrade.md` |
 | Surgical robotics / VPPV | `reports/vppv_perception_reliability_monitor.md` as an application case |
 
 ## Best Next Experiment
