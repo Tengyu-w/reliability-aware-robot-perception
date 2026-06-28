@@ -52,7 +52,7 @@ Current output:
 | Selected samples | 360 |
 | Stage 1 boundary-first routes | 288 |
 | Stage 2 reserved residual routes | 72 |
-| Teacher high-risk capture | 66.7% |
+| High-risk target capture | 66.7% |
 | Top 10% visual-state-risk capture | 62.8% |
 | Top 25% visual-state-risk capture | 66.9% |
 | RECOVER/HUMAN_REVIEW state capture | 76.5% |

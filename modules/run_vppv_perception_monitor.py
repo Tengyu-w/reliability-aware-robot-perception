@@ -567,7 +567,7 @@ def run_signal_group_ablation(df, y, observed, seed, output_dir):
     plt.figure(figsize=(9, 4.8))
     plot_df = ablation.sort_values("teacher_roc_auc", ascending=True)
     plt.barh(plot_df["signal_group"], plot_df["teacher_roc_auc"], color="#59a14f")
-    plt.xlabel("Teacher ROC-AUC")
+    plt.xlabel("Distillation ROC-AUC")
     plt.title("Signal-Group Ablation for Visual-State Risk")
     plt.xlim(0.0, 1.05)
     plt.tight_layout()
@@ -762,12 +762,12 @@ def write_report_legacy(report_path, metrics, state_counts):
         "",
         f"- Samples: {metrics['samples']}",
         f"- Split: {metrics['split_strategy']}",
-        f"- Teacher high-risk threshold: {metrics['teacher_high_risk_threshold']:.3f}",
-        f"- Teacher high-risk rate: {metrics['teacher_high_risk_rate']:.3f}",
+        f"- Distillation high-risk threshold: {metrics['teacher_high_risk_threshold']:.3f}",
+        f"- Distillation high-risk rate: {metrics['teacher_high_risk_rate']:.3f}",
         f"- Selected model: {metrics['selected_model']}",
         f"- Runtime output: `visual_state_risk`",
         "",
-        "| Model | Teacher ROC-AUC | Teacher AP | Brier | Observed-proxy ROC-AUC |",
+        "| Model | Distillation ROC-AUC | Distillation AP | Brier | Observed-proxy ROC-AUC |",
         "|---|---:|---:|---:|---:|",
         *model_rows,
         "",
@@ -882,12 +882,12 @@ def write_report(report_path, metrics, state_counts, feature_importance, ablatio
         "",
         f"- Samples: {metrics['samples']}",
         f"- Split: {metrics['split_strategy']}",
-        f"- Teacher high-risk threshold: {metrics['teacher_high_risk_threshold']:.3f}",
-        f"- Teacher high-risk rate: {metrics['teacher_high_risk_rate']:.3f}",
+        f"- Distillation high-risk threshold: {metrics['teacher_high_risk_threshold']:.3f}",
+        f"- Distillation high-risk rate: {metrics['teacher_high_risk_rate']:.3f}",
         f"- Selected model: {metrics['selected_model']}",
         f"- Runtime output: `visual_state_risk`",
         "",
-        "| Model | Teacher ROC-AUC | Teacher AP | Brier | Observed-proxy ROC-AUC |",
+        "| Model | Distillation ROC-AUC | Distillation AP | Brier | Observed-proxy ROC-AUC |",
         "|---|---:|---:|---:|---:|",
         *model_rows,
         "",
@@ -907,7 +907,7 @@ def write_report(report_path, metrics, state_counts, feature_importance, ablatio
         "",
         "This ablation asks which family of signals is most useful for VPPV front-end risk. It is a diagnostic comparison, not a deployment model choice: some groups include teacher-side audit signals that are heavier than the lightweight runtime input.",
         "",
-        "| Signal group | Features | Teacher ROC-AUC | Teacher AP | Observed-proxy ROC-AUC |",
+        "| Signal group | Features | Distillation ROC-AUC | Distillation AP | Observed-proxy ROC-AUC |",
         "|---|---:|---:|---:|---:|",
         *ablation_rows,
         "",

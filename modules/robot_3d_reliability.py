@@ -673,7 +673,7 @@ def write_robot_3d_report(output_dir, metrics, title="Robot 3D Perception Reliab
 
     lines.extend([
         "",
-        "## Supervisor Fit",
+        "## Research Fit",
         "",
         "- Reliable 3D scene understanding: depth observations that drift from clean geometry can be flagged before downstream planning.",
         "- Embodied navigation: high-risk perception frames can trigger abstention, slower control, or human review.",

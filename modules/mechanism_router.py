@@ -348,7 +348,7 @@ def write_report(out, counts, metrics, report_path):
         "## Proxy Capture",
         "",
         f"- Observed failure proxy capture: {fmt(metrics.get('observed_failure_proxy_capture'))}",
-        f"- Teacher high-risk capture: {fmt(metrics.get('teacher_high_risk_capture'))}",
+        f"- High-risk target capture: {fmt(metrics.get('teacher_high_risk_capture'))}",
         f"- Top 10% visual-state-risk capture: {fmt(metrics.get('top10_visual_state_risk_capture'))}",
         f"- Top 25% visual-state-risk capture: {fmt(metrics.get('top25_visual_state_risk_capture'))}",
         f"- Depth corruption capture: {fmt(metrics.get('depth_corruption_capture'))}",

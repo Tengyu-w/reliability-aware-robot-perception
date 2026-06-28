@@ -216,7 +216,7 @@ def run_trajectory_residual_demo(output_dir, n_per_type=80, length=80, seed=42):
         f"- ROC-AUC: {metrics['roc_auc']:.3f}",
         f"- Average precision: {metrics['average_precision']:.3f}",
         "",
-        "## Supervisor Fit",
+        "## Research Fit",
         "",
         "- Surgical autonomy: tool trajectory deviation and recovery triggers.",
         "- Runtime assurance: residual scores route to RECOVER or HUMAN_REVIEW.",

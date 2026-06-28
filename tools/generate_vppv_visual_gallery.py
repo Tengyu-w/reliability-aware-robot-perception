@@ -71,7 +71,7 @@ def save_dashboard(feature: pd.DataFrame, ablation: pd.DataFrame, state_counts: 
     a = ablation.sort_values("teacher_roc_auc", ascending=True)
     axes[1].barh(a["signal_group"], a["teacher_roc_auc"], color="#59a14f")
     axes[1].set_title("Signal-group ablation")
-    axes[1].set_xlabel("teacher ROC-AUC")
+    axes[1].set_xlabel("distillation ROC-AUC")
     axes[1].set_xlim(0, 1.05)
 
     colors = ["#2ca02c", "#ff7f0e", "#d62728", "#9467bd"]

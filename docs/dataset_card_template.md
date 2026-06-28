@@ -17,7 +17,7 @@ robot 3D perception reliability experiments.
 - Robot perception relevance:
 - Scene type:
 - Sensor modality:
-- Expected connection to target supervisors:
+- Expected connection to target research use cases:
 
 ## Preparation
 

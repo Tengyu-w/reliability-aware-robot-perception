@@ -28,7 +28,7 @@ flowchart LR
     D --> E["Risk distillation"]
     E --> F["Mechanism-separated routing"]
     F --> H["Runtime state machine"]
-    H --> G["Application transfer"]
+    H --> G["Transfer case"]
 
     C --> C1["TUM RGB-D corruption benchmark"]
     D --> D1["Global / grid / PCA descriptor comparison"]
@@ -42,10 +42,10 @@ flowchart LR
 
 | Layer | Dataset / setup | Key result | Interpretation |
 |---|---:|---:|---|
-| Risk distillation | 1800 aligned visual/action samples | Random Forest teacher ROC-AUC 0.992 | Depth/temporal/embedding/trajectory evidence becomes `visual_state_risk` |
+| Risk distillation | 1800 aligned visual/action samples | Random Forest distillation ROC-AUC 0.992 | Depth/temporal/embedding/trajectory evidence becomes `visual_state_risk` |
 | Route evaluation | Distilled risk states | 1350 NORMAL, 433 SUSPECT, 17 RECOVER, 0 HUMAN_REVIEW | Risk maps to concrete autonomy actions |
-| Outcome-linked validation | Risk vs downstream signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | The score is decision-relevant, not only a teacher fit |
-| Mechanism router | VPPV risk trace | 20% budget captures 66.7% teacher high-risk and 76.5% RECOVER/HUMAN_REVIEW | Scalar risk becomes mechanism-specific routing |
+| Outcome-linked validation | Risk vs downstream signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | The score is decision-relevant, not only fitted to the distillation target |
+| Mechanism router | VPPV risk trace | 20% budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW | Scalar risk becomes mechanism-specific routing |
 | Synthetic 3D reliability | Synthetic depth corruptions | ROC-AUC 0.804 +/- 0.028 | Smoke evidence for embedding-risk scoring |
 | TUM RGB-D corruption | 300 depth files, 1800 samples | source-paired ROC-AUC 1.000 | Controlled corruptions are detectable |
 | TUM scene-conditioned baseline | Same TUM run | ROC-AUC 0.483 | Global clean references fail under camera motion |
@@ -89,10 +89,10 @@ flowchart LR
     E --> I["HUMAN_REVIEW: operator check"]
 ```
 
-This transfer is academically useful because it preserves the broad method
-while showing a concrete high-stakes use case. It also gives a careful claim:
-the monitor is VPPV-compatible in spirit, but it is not a VPPV reproduction and
-has not yet been validated on paired surgical policy rollouts.
+This transfer case preserves the general reliability-monitoring method while
+showing a concrete high-stakes front-end use case. The monitor is
+VPPV-compatible in spirit, but it is not a VPPV reproduction and has not yet
+been validated on paired surgical policy rollouts.
 
 ## What It Does Not Prove
 
@@ -103,17 +103,17 @@ has not yet been validated on paired surgical policy rollouts.
 - The surgical-autonomy case is a transfer framing, not a claim of reproducing
   VPPV itself.
 
-## Supervisor Reading Guide
+## Technical Reading Guide
 
-| Supervisor direction | Read first |
+| Topic | Read first |
 |---|---|
-| Reliable robot perception | TUM temporal and pose-aware sections in this overview |
-| Trustworthy ML / calibration | `docs/application_evidence_pack.md`, calibration section |
-| Runtime assurance / formal methods | `docs/application_evidence_pack.md`, runtime monitor section |
-| Embodied AI / navigation | Temporal state-change and route-state sections |
-| Transferability estimation | Descriptor comparison: global -> grid -> PCA |
-| Mechanism-routing upgrade | `docs/mechanism_separated_routing_upgrade.md` |
-| Surgical robotics / VPPV | `reports/vppv_perception_reliability_monitor.md` as an application case |
+| Industrial action recognition | `modules/main.py`, `modules/model.py`, and `modules/readme.md` |
+| Embedding and temporal diagnostics | `modules/embedding_analysis.py` and temporal sections in this overview |
+| RGB-D reliability | TUM temporal and pose-aware sections in this overview |
+| Calibration and coverage risk | `modules/calibration_analysis.py` |
+| Runtime state monitoring | `modules/runtime_monitor.py` |
+| Mechanism-separated routing | `docs/mechanism_separated_routing_upgrade.md` |
+| VPPV-style transfer case | `reports/vppv_perception_reliability_monitor.md` |
 
 ## Best Next Experiment
 

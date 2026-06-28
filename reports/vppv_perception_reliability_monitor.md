@@ -18,12 +18,12 @@ VPPV-style autonomy depends on segmentation masks, depth maps, perceptual regres
 
 - Samples: 1800
 - Split: group_shuffle_by_source_file
-- Teacher high-risk threshold: 0.465
-- Teacher high-risk rate: 0.250
+- Distillation high-risk threshold: 0.465
+- Distillation high-risk rate: 0.250
 - Selected model: random_forest
 - Runtime output: `visual_state_risk`
 
-| Model | Teacher ROC-AUC | Teacher AP | Brier | Observed-proxy ROC-AUC |
+| Model | Distillation ROC-AUC | Distillation AP | Brier | Observed-proxy ROC-AUC |
 |---|---:|---:|---:|---:|
 | logistic_regression | 0.986 | 0.955 | 0.039 | 0.934 |
 | random_forest | 0.992 | 0.982 | 0.026 | 0.707 |
@@ -49,9 +49,9 @@ High-risk samples are exported with one-sentence explanations in `top_risk_cases
 
 ## Experiment A3: Signal-Group Ablation
 
-This ablation asks which family of signals is most useful for VPPV front-end risk. It is a diagnostic comparison, not a deployment model choice: some groups include teacher-side audit signals that are heavier than the lightweight runtime input.
+This ablation asks which family of signals is most useful for VPPV front-end risk. It is a diagnostic comparison, not a deployment model choice: some groups include audit signals that are heavier than the lightweight runtime input.
 
-| Signal group | Features | Teacher ROC-AUC | Teacher AP | Observed-proxy ROC-AUC |
+| Signal group | Features | Distillation ROC-AUC | Distillation AP | Observed-proxy ROC-AUC |
 |---|---:|---:|---:|---:|
 | all_signals | 12 | 0.997 | 0.992 | 0.625 |
 | all_except_temporal | 10 | 0.997 | 0.992 | 0.662 |

@@ -1,9 +1,9 @@
 # Industrial Action Recognition To Reliability-Aware Robot Perception
 
-Research code for an industrial sensing and robot-perception course project.
-The project begins with image/video-based human action recognition for an
-industrial setting, then upgrades that recognition pipeline into a
-reliability-aware visual-state monitor.
+Research code for industrial sensing and reliability-aware robot perception.
+The project begins with image/video-based human action recognition in an
+industrial setting, then extends that recognition pipeline into a
+reliability-aware visual-state monitoring framework.
 
 The original system uses a CNN-LSTM network for visual action recognition:
 sample frames from AVI videos, extract image features with a ResNet18 CNN,
@@ -24,7 +24,7 @@ This is a research prototype. It is not a certified safety system, not a
 closed-loop robot safety proof, and not a reproduction of any surgical autonomy
 framework.
 
-## Original Course Foundation: Industrial Action Recognition
+## Initial System: Industrial Action Recognition
 
 The first layer of this project is an industrial visual recognition system.
 It addresses a practical sensing problem: given short video clips or image
@@ -42,12 +42,12 @@ AVI video / image sequence
   -> validation accuracy, training curves, test predictions, embedding analysis
 ```
 
-This matters for the application narrative because the project is not only a
-post-hoc uncertainty study. It first demonstrates the ability to process visual
-sensor data and recognize actions from images over time. The later reliability
-work is built on top of this recognition ability: once a model can identify an
-action or visual state, the next question is whether the system can estimate
-how trustworthy that recognition is.
+This stage establishes the visual sensing capability of the project. The system
+processes image sequences, extracts frame-level visual features, models
+temporal motion, and predicts an action class. The later reliability work is
+built on top of this recognition layer: once a model can identify an action or
+visual state, the next question is whether the system can estimate how
+trustworthy that recognition is.
 
 The reliability upgrade therefore plays two roles:
 
@@ -57,14 +57,14 @@ The reliability upgrade therefore plays two roles:
   states should trigger re-perception, recovery, replanning, or human review
   rather than being accepted automatically.
 
-## Project In One Sentence
+## Project Summary
 
 This project starts from industrial human action recognition with a ResNet18
 CNN plus LSTM video classifier, adds confidence/feature-fit style evidence to
 understand and improve recognition reliability, then extends the same logic
 into a mechanism-separated runtime router for robot perception.
 
-The final GitHub framing is:
+The repository is organized around three technical components:
 
 - The first capability is visual sequence recognition: image frames, temporal
   motion, and action-class prediction.
@@ -74,9 +74,9 @@ The final GitHub framing is:
 - VPPV-style surgical autonomy is used as a transfer case, not as the whole
   project name and not as a claim of surgical validation.
 
-## How The Research Logic Evolved
+## Research Development
 
-The project is best read as a staged research story.
+The project is organized as a staged research program.
 
 1. Build an industrial human-action recognition baseline from AVI video:
    ResNet18 extracts frame-level image features and an LSTM models the action
@@ -121,7 +121,7 @@ industrial video/action data
 
 ## Key Finding
 
-The strongest lesson is that a reliability project should not stop at a better
+The central finding is that a reliability project should not stop at a better
 embedding or a single larger model.
 
 Embedding evidence is useful because it shows when the model's internal visual
@@ -182,7 +182,7 @@ flowchart TD
 | 6. Temporal excess | Local window normalization around the current frame. | Reliability should ask whether the current change is abnormal locally. | Temporal excess separates abnormal state changes better than global reference distance. |
 | 7. Calibration and coverage | Coverage-risk and calibration-style analyses. | A monitor needs ranking quality and probability caution. | Risk ranking can be strong while raw scores remain poorly calibrated probabilities. |
 | 8. Trajectory residual | Planned-vs-observed action outcome residual demo. | Perception reliability matters because it affects execution. | Residuals provide downstream failure evidence beyond visual descriptors. |
-| 9. Risk distillation | Random forest/logistic/tree students distilled multi-source signals into `visual_state_risk`. | Heavy analysis must become a lightweight runtime signal. | A compact monitor can approximate richer reliability evidence. |
+| 9. Risk distillation | Random forest, logistic regression, and decision-tree models distilled multi-source signals into `visual_state_risk`. | Heavy analysis must become a lightweight runtime signal. | A compact monitor can approximate richer reliability evidence. |
 | 10. Runtime state machine | Risk scores mapped to `NORMAL`, `SUSPECT`, `RECOVER`, `HUMAN_REVIEW`. | Robot systems need auditable actions, not only plots. | Continuous risk can become transparent autonomy states. |
 | 11. Mechanism router | Boundary-first route plus reserved residual budget. | Different failure mechanisms need different actions. | This is the clearest current decision layer and the best place to extend the project. |
 
@@ -191,10 +191,10 @@ flowchart TD
 | Evidence layer | Setup | Result | Interpretation |
 | --- | ---: | ---: | --- |
 | CNN-LSTM action recognition | AVI video/image sequences | ResNet18 frame encoder + LSTM temporal classifier | Demonstrates the original image-sequence recognition capability. |
-| Risk distillation | 1800 aligned visual/action samples | Random Forest teacher ROC-AUC 0.992 | `visual_state_risk` approximates heavier reliability evidence. |
+| Risk distillation | 1800 aligned visual/action samples | Random Forest distillation ROC-AUC 0.992 | `visual_state_risk` approximates heavier reliability evidence. |
 | Runtime route states | Distilled risk trace | 1350 NORMAL / 433 SUSPECT / 17 RECOVER / 0 HUMAN_REVIEW | Visual risk becomes concrete autonomy routing. |
-| Outcome link | Distilled risk vs residual signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | The risk score is decision-relevant, not only a teacher-fitting score. |
-| Mechanism router | 1800 aligned visual/action samples | 20% budget captures 66.7% teacher high-risk and 76.5% RECOVER/HUMAN_REVIEW | Scalar risk is split into boundary-first and residual mechanism routes. |
+| Outcome link | Distilled risk vs residual signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | The risk score is decision-relevant, not only fitted to the distillation target. |
+| Mechanism router | 1800 aligned visual/action samples | 20% budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW | Scalar risk is split into boundary-first and residual mechanism routes. |
 | Synthetic 3D reliability | 3 seeds, 8 samples per scene | ROC-AUC 0.804 +/- 0.028 | Embedding risk gives a reproducible smoke-test signal. |
 | TUM RGB-D corruption | 300 depth files, 1800 samples | Source-paired ROC-AUC 1.000 | Controlled corruptions are detectable in this setup. |
 | TUM scene-conditioned baseline | Same TUM run | ROC-AUC 0.483 | Global clean references fail under normal camera motion. |
@@ -211,7 +211,7 @@ The CSV version of this table is in
 
 ## What Was Learned From The VTVF Upgrade
 
-This project borrowed a research lesson from the VT/VF ECG reliability work:
+This project follows a research lesson from the VT/VF ECG reliability work:
 do not confuse representation improvement with reliability.
 
 In the ECG project, better-looking VT/VF embeddings did not always reduce
@@ -229,14 +229,14 @@ The same logic applies here:
   re-perception; some need recovery or replanning; some need extra observation;
   some should slow down and recheck state.
 
-This is why the latest upgrade is
+The latest implementation of this design is
 [`modules/mechanism_router.py`](modules/mechanism_router.py), with the method
 summary in
 [`docs/mechanism_separated_routing_upgrade.md`](docs/mechanism_separated_routing_upgrade.md).
 
 ## VPPV-Style Transfer Case
 
-The VPPV-style section is an application case for surgical-autonomy front-end
+The VPPV-style section is a transfer case for surgical-autonomy front-end
 monitoring. It is not the name of the whole project and does not claim to
 reproduce VPPV.
 
@@ -287,14 +287,13 @@ show representative evidence without committing the full `outputs/` directory.
 
 More selected figures are listed in [`docs/figures/README.md`](docs/figures/README.md).
 
-## How To Read This Repository
+## Repository Guide
 
 | Document | Purpose |
 | --- | --- |
 | [`docs/project_overview.md`](docs/project_overview.md) | Technical overview of the research question and pipeline. |
 | [`docs/mechanism_separated_routing_upgrade.md`](docs/mechanism_separated_routing_upgrade.md) | Latest VTVF-inspired mechanism-routing upgrade. |
 | [`reports/vppv_perception_reliability_monitor.md`](reports/vppv_perception_reliability_monitor.md) | Detailed VPPV-style surgical-autonomy transfer case. |
-| [`docs/application_evidence_pack.md`](docs/application_evidence_pack.md) | Compact evidence summary for supervisors or reviewers. |
 | [`docs/VISUAL_EVIDENCE_INDEX.md`](docs/VISUAL_EVIDENCE_INDEX.md) | Public figure and table index. |
 | [`docs/experiment_order.md`](docs/experiment_order.md) | Recommended order for reading and rerunning experiments. |
 | [`docs/limitations.md`](docs/limitations.md) | Scope, limitations, and next validation steps. |
