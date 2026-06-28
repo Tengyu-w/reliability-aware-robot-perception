@@ -1,14 +1,21 @@
-# Reliability-Aware Sequential Robot Perception
+# Industrial Action Recognition To Reliability-Aware Robot Perception
 
-Research code for studying whether a sequential robot perception model can
-recognize when its own visual state estimate is unreliable.
+Research code for an industrial sensing and robot-perception course project.
+The project begins with image/video-based human action recognition for an
+industrial setting, then upgrades that recognition pipeline into a
+reliability-aware visual-state monitor.
 
-The project starts from a CNN-LSTM visual sequence baseline, then turns the
-model's depth, temporal, embedding, calibration, and action-outcome evidence
-into a runtime reliability monitor.
+The original system uses a CNN-LSTM network for visual action recognition:
+sample frames from AVI videos, extract image features with a ResNet18 CNN,
+model temporal motion with an LSTM, and output the predicted human action
+class. This part is the sensor/image-recognition foundation of the project.
 
-The central question is not only whether the perception model predicts a class
-or state correctly. The main question is:
+The later research upgrade asks a second question: after the model recognizes
+an action or visual state, can it also estimate whether that recognition is
+reliable enough for a robot or autonomy system to trust?
+
+The central question is therefore not only whether the perception model
+predicts a class or state correctly. The main question is:
 
 > When should a robot stop trusting its current visual state and trigger
 > re-perception, recovery, replanning, or human review?
@@ -17,15 +24,50 @@ This is a research prototype. It is not a certified safety system, not a
 closed-loop robot safety proof, and not a reproduction of any surgical autonomy
 framework.
 
+## Original Course Foundation: Industrial Action Recognition
+
+The first layer of this project is an industrial visual recognition system.
+It addresses a practical sensing problem: given short video clips or image
+sequences from an industrial/robotic setting, recognize the human action or
+visual activity class.
+
+The implemented baseline is:
+
+```text
+AVI video / image sequence
+  -> sample 16 frames
+  -> ResNet18 CNN frame encoder
+  -> LSTM temporal sequence model
+  -> action-class prediction
+  -> validation accuracy, training curves, test predictions, embedding analysis
+```
+
+This matters for the application narrative because the project is not only a
+post-hoc uncertainty study. It first demonstrates the ability to process visual
+sensor data and recognize actions from images over time. The later reliability
+work is built on top of this recognition ability: once a model can identify an
+action or visual state, the next question is whether the system can estimate
+how trustworthy that recognition is.
+
+The reliability upgrade therefore plays two roles:
+
+- It supports recognition quality by analyzing confidence, entropy, margins,
+  embeddings, and feature-fit style evidence.
+- It prepares the recognition model for robot use, where uncertain visual
+  states should trigger re-perception, recovery, replanning, or human review
+  rather than being accepted automatically.
+
 ## Project In One Sentence
 
-This project starts from CNN-LSTM sequential perception, finds that embedding
-or global-distance evidence alone is not enough to decide whether a visual
-state is safe, then converts multi-source reliability evidence into a
-mechanism-separated runtime router for robot perception.
+This project starts from industrial human action recognition with a ResNet18
+CNN plus LSTM video classifier, adds confidence/feature-fit style evidence to
+understand and improve recognition reliability, then extends the same logic
+into a mechanism-separated runtime router for robot perception.
 
 The final GitHub framing is:
 
+- The first capability is visual sequence recognition: image frames, temporal
+  motion, and action-class prediction.
 - `visual_state_risk` is the lightweight reliability evidence score.
 - Mechanism-separated routing is the decision layer: boundary-first visual
   state review, then a reserved residual budget for other failure mechanisms.
@@ -36,21 +78,28 @@ The final GitHub framing is:
 
 The project is best read as a staged research story.
 
-1. Start with a CNN-LSTM video or sequential perception baseline.
-2. Inspect embeddings, confidence, and temporal state changes instead of only
+1. Build an industrial human-action recognition baseline from AVI video:
+   ResNet18 extracts frame-level image features and an LSTM models the action
+   sequence.
+2. Train and evaluate the classifier with train/validation/test splits,
+   prediction export, training curves, and validation accuracy.
+3. Add recognition-quality analysis: embeddings, confidence, entropy, margins,
+   and feature-fit style diagnostics, so the project can explain which visual
+   sequences are easy or hard for the model.
+4. Inspect embeddings, confidence, and temporal state changes instead of only
    reporting classification accuracy.
-3. Test RGB-D/depth reliability under controlled corruption and camera motion.
-4. Learn a key negative result: distance from a global clean reference can fail
+5. Test RGB-D/depth reliability under controlled corruption and camera motion.
+6. Learn a key negative result: distance from a global clean reference can fail
    under normal camera motion, so reliability must be local and temporal.
-5. Add waveform-like temporal excess analysis to detect abnormal visual-state
+7. Add waveform-like temporal excess analysis to detect abnormal visual-state
    changes relative to a local window.
-6. Add action-outcome evidence through trajectory residuals, because visual
+8. Add action-outcome evidence through trajectory residuals, because visual
    reliability matters most when it affects downstream execution.
-7. Distill depth, temporal, embedding, trajectory, calibration, and coverage
+9. Distill depth, temporal, embedding, trajectory, calibration, and coverage
    signals into `visual_state_risk`.
-8. Convert scalar risk into auditable runtime states:
+10. Convert scalar risk into auditable runtime states:
    `NORMAL`, `SUSPECT`, `RECOVER`, and `HUMAN_REVIEW`.
-9. Upgrade the scalar monitor into a mechanism-separated hierarchical router:
+11. Upgrade the scalar monitor into a mechanism-separated hierarchical router:
    Stage 1 handles boundary-like visual-state risk; Stage 2 reserves budget
    for residual mechanisms such as trajectory, depth/signal quality,
    representation conflict, and progress/calibration inconsistency.
@@ -58,8 +107,10 @@ The project is best read as a staged research story.
 The resulting chain is:
 
 ```text
-CNN-LSTM perception
-  -> embedding and temporal diagnostics
+industrial video/action data
+  -> ResNet18 CNN frame recognition
+  -> LSTM temporal action classification
+  -> confidence, embedding, and feature-fit diagnostics
   -> RGB-D/depth corruption and camera-motion analysis
   -> local temporal excess scoring
   -> trajectory residual and downstream outcome evidence
@@ -139,6 +190,7 @@ flowchart TD
 
 | Evidence layer | Setup | Result | Interpretation |
 | --- | ---: | ---: | --- |
+| CNN-LSTM action recognition | AVI video/image sequences | ResNet18 frame encoder + LSTM temporal classifier | Demonstrates the original image-sequence recognition capability. |
 | Risk distillation | 1800 aligned visual/action samples | Random Forest teacher ROC-AUC 0.992 | `visual_state_risk` approximates heavier reliability evidence. |
 | Runtime route states | Distilled risk trace | 1350 NORMAL / 433 SUSPECT / 17 RECOVER / 0 HUMAN_REVIEW | Visual risk becomes concrete autonomy routing. |
 | Outcome link | Distilled risk vs residual signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | The risk score is decision-relevant, not only a teacher-fitting score. |

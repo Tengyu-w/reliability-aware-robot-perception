@@ -1,4 +1,5 @@
 evidence_layer,setup,result,interpretation
+CNN-LSTM action recognition,"AVI video/image sequences","ResNet18 frame encoder + LSTM temporal classifier","Demonstrates the original image-sequence recognition capability"
 Risk distillation,"1800 aligned visual/action samples","Random Forest teacher ROC-AUC 0.992","Lightweight visual_state_risk approximates heavier reliability evidence"
 Runtime route states,"distilled risk trace","1350 NORMAL / 433 SUSPECT / 17 RECOVER / 0 HUMAN_REVIEW","Visual-state risk becomes concrete autonomy routing"
 Outcome-linked validation,"distilled risk vs residual signals","top 10% risk captures 100% RECOVER/HUMAN_REVIEW","Risk is decision-relevant, not only a teacher-fitting score"
