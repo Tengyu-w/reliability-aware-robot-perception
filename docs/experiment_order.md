@@ -1,8 +1,8 @@
 # Experiment Order
 
 This document lists the intended reading and execution order. The repository is
-organized as a general reliability-aware sequential robot perception project,
-with a VPPV-style surgical autonomy transfer case near the end.
+organized as an industrial visual action recognition project upgraded with
+reliability-aware robot perception and route-state monitoring.
 
 | Step | Purpose | Main scripts | Main evidence |
 |---:|---|---|---|
@@ -12,27 +12,50 @@ with a VPPV-style surgical autonomy transfer case near the end.
 | 4 | Compare pose-aware depth descriptors | `modules/run_tum_pose_embedding_analysis.py`, `modules/run_tum_pca_depth_descriptor.py` | Global/grid/PCA descriptor relation to camera motion |
 | 5 | Evaluate calibration and selective prediction | `modules/calibration_analysis.py` | ROC-AUC, average precision, calibration gap, retained-risk curves |
 | 6 | Evaluate trajectory residual evidence | `modules/trajectory_residual_demo.py` | Planned-vs-observed residual risk and failure-type analysis |
-| 7 | Run visual-state risk distillation and route evaluation | `modules/run_vppv_perception_monitor.py` | `visual_state_risk`, feature importance, ablation, state counts, route policy |
-| 8 | Generate GitHub-facing visual evidence | `tools/generate_vppv_visual_gallery.py` | Architecture, dashboard, route flow, state strip, and risk figures |
-| 9 | Read the surgical transfer report | `reports/vppv_perception_reliability_monitor.md` | VPPV-style application case, results, and limitations |
-| 10 | Inspect public visual evidence | `docs/VISUAL_EVIDENCE_INDEX.md` | Curated figures and snapshot tables |
+| 7 | Inspect mechanism-separated route logic | `modules/mechanism_router.py` | Boundary-first routing, reserved residual routes, and fixed-budget review logic |
+| 8 | Inspect public visual evidence | `docs/VISUAL_EVIDENCE_INDEX.md` | Curated figures and snapshot tables |
 
 ## Primary Reproduction
 
-For the compact public evidence layer:
+For the RGB-D reliability path:
 
 ```bash
-python modules/run_vppv_perception_monitor.py
-python tools/generate_vppv_visual_gallery.py
+python modules/download_tum_rgbd_sample.py \
+  --sequence freiburg1_desk \
+  --raw-dir data/raw/tum_rgbd \
+  --prepared-dir data/prepared_depth/tum_rgbd_freiburg1_desk \
+  --max-files 300
+
+python modules/run_temporal_depth_benchmark.py \
+  --depth-dir data/prepared_depth/tum_rgbd_freiburg1_desk \
+  --output-dir outputs/tum_rgbd_freiburg1_desk_temporal \
+  --depth-scale 5000 \
+  --max-files 300 \
+  --window 5
 ```
 
-For the broader RGB-D reliability path, run the TUM preparation and temporal
-benchmark scripts before the risk-distillation script.
+For the action-outcome residual path:
+
+```bash
+python modules/trajectory_residual_demo.py --output-dir outputs/trajectory_residual_demo
+```
+
+For route-policy inspection, pass a prepared risk trace that contains the
+visual, temporal, depth, trajectory, progress, calibration, and coverage columns
+used by `modules/mechanism_router.py`:
+
+```bash
+python modules/mechanism_router.py \
+  --input-csv <risk_trace.csv> \
+  --output-dir outputs/mechanism_router \
+  --action-budget 0.20 \
+  --residual-reserve 0.20
+```
 
 ## Research Interpretation
 
 The strongest claim is not that the system is safe for deployment. The claim is
 that visual-state reliability can be monitored, explained, and routed:
-`NORMAL` continues policy execution, `SUSPECT` triggers re-perception,
-`RECOVER` triggers replanning or backup behavior, and `HUMAN_REVIEW` requests an
+`NORMAL` continues execution, `SUSPECT` triggers re-observation, `RECOVER`
+triggers pause/replanning/recovery behavior, and `HUMAN_REVIEW` requests
 operator confirmation when the state cannot be trusted.

@@ -326,7 +326,7 @@ def write_report(out, counts, metrics, report_path):
         "",
         "## Research Question",
         "",
-        "Can the scalar visual-state monitor be upgraded into mechanism-specific runtime routing for a CNN-LSTM / VPPV-style perception front end?",
+        "Can the scalar visual-state monitor be upgraded into mechanism-specific runtime routing for an industrial CNN-LSTM perception front end?",
         "",
         "## Main Idea",
         "",
@@ -357,7 +357,7 @@ def write_report(out, counts, metrics, report_path):
         "",
         "## Interpretation",
         "",
-        "This is the LSTM-CNN/VPPV analogue of the VT/VF upgrade: embedding evidence is not treated as the answer by itself. It becomes one mechanism signal inside a hierarchy that can route different reliability failures to different actions.",
+        "This is the CNN-LSTM analogue of the VT/VF upgrade: embedding evidence is not treated as the answer by itself. It becomes one mechanism signal inside a hierarchy that can route different reliability failures to different actions.",
         "",
         "## Limitations",
         "",
@@ -374,8 +374,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Run mechanism-separated visual reliability routing.")
     parser.add_argument(
         "--input-csv",
-        default="outputs/vppv_perception_monitor/risk_trace.csv",
-        help="CSV produced by run_vppv_perception_monitor.py.",
+        default="outputs/visual_state_monitor/risk_trace.csv",
+        help="CSV containing visual, temporal, depth, trajectory, progress, calibration, and coverage-risk columns.",
     )
     parser.add_argument(
         "--output-dir",

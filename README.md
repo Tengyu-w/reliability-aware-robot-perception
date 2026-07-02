@@ -48,7 +48,6 @@ industrial image/video action recognition
   -> trajectory residuals as downstream action-outcome evidence
   -> visual_state_risk distillation
   -> proof-of-concept evidence-to-action monitor
-  -> optional high-risk visual-front-end transfer case
 ```
 
 This structure keeps the initial visual-recognition capability visible while
@@ -236,38 +235,20 @@ This is the intended project-level output. In the current repository, the
 graded response layer is a proof-of-concept monitor built from proxy evidence,
 not a validated industrial robot controller.
 
-## 8. Secondary Transfer Case: VPPV-Style Front-End Monitoring
+## 8. Future Extension: Visual-State Consistency
 
-The VPPV-style section is kept only as a secondary transfer case for
-high-stakes visual front-end monitoring. It does not rename the project and
-does not claim to reproduce or validate VPPV.
+One useful future extension is a visual-to-state consistency check: the system
+would convert camera evidence into an action or scene state, then verify
+whether later visual evidence, temporal motion, depth quality, and action
+outcome remain consistent with that state.
 
-| Front-end dependency | Monitor evidence |
-| --- | --- |
-| Depth map | valid-depth ratio, mean depth, depth variance, corruption score |
-| Perceptual state or embedding | embedding shift, local temporal state change |
-| Physical or task progress state | progress slope, progress stagnation |
-| Action outcome consistency | planned-vs-observed trajectory residual |
-| Runtime autonomy decision | `NORMAL`, `SUSPECT`, `RECOVER`, `HUMAN_REVIEW`, or route-specific review |
-
-The careful claim is that the monitor is compatible with a VPPV-style visual
-front end as a reliability wrapper. It has not been validated on paired
-surgical robot logs, real segmentation masks, VPPV policy rollouts, or clinical
-deployment data.
+This idea fits the project because industrial robots often need to act on a
+visual state estimate rather than on a raw image. However, the current
+repository should not present this as a completed closed-loop module. The
+implemented contribution is the industrial CNN-LSTM recognition baseline, the
+multi-source reliability evidence, and the proof-of-concept route policy.
 
 ## 9. Selected Visual Evidence
-
-| Reliability monitor architecture | Visual risk dashboard |
-| --- | --- |
-| ![Reliability monitor architecture](docs/figures/vppv_monitor_architecture.png) | ![Visual risk dashboard](docs/figures/vppv_visual_dashboard.png) |
-
-| Feature attribution | Signal-group ablation |
-| --- | --- |
-| ![Feature importance](docs/figures/vppv_feature_importance.png) | ![Signal group ablation](docs/figures/vppv_signal_group_ablation.png) |
-
-| Route policy | Risk trace |
-| --- | --- |
-| ![Route policy flow](docs/figures/vppv_route_policy_flow.png) | ![Risk trace](docs/figures/vppv_risk_trace.png) |
 
 | Temporal reliability | Runtime monitoring |
 | --- | --- |
@@ -294,7 +275,6 @@ modules/
   calibration_analysis.py              Calibration and coverage-risk analysis
   trajectory_residual_demo.py          Action-outcome residual reliability demo
   runtime_monitor.py                   Risk scores to runtime states
-  run_vppv_perception_monitor.py       Risk distillation and transfer case
   mechanism_router.py                  Reserved-budget route policy
 
 docs/
@@ -302,9 +282,6 @@ docs/
   mechanism_separated_routing_upgrade.md
   limitations.md                       Evidence boundary and next validation steps
   VISUAL_EVIDENCE_INDEX.md             Public figure and table index
-
-reports/
-  vppv_perception_reliability_monitor.md
 ```
 
 ## 11. Reproduce Key Runs
@@ -345,13 +322,11 @@ python modules/runtime_monitor.py \
   --score-column temporal_excess_score
 ```
 
-Risk distillation and route-policy run:
+Route-policy run from a prepared risk trace:
 
 ```bash
-python modules/run_vppv_perception_monitor.py
-
 python modules/mechanism_router.py \
-  --input-csv outputs/vppv_perception_monitor/risk_trace.csv \
+  --input-csv <risk_trace.csv> \
   --output-dir outputs/mechanism_router \
   --action-budget 0.20 \
   --residual-reserve 0.20
@@ -370,8 +345,8 @@ not tracked by Git. See `data/README.md`.
   safety.
 - Calibration results support risk ranking, not calibrated probability
   deployment.
-- The primary target is industrial visual action monitoring; the VPPV-style
-  section is only a secondary transfer case, not surgical system validation.
+- Visual-to-state consistency is a proposed future extension, not a completed
+  external-framework validation.
 - Runtime states and route policies are transparent research rules, not formal
   safety guarantees.
 

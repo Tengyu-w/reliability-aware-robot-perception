@@ -12,7 +12,7 @@ distance, local mixing, confidence, regularity, and corruption evidence should
 not be treated as direct answers. They are better used as evidence for distinct
 failure mechanisms.
 
-This upgrade therefore reframes the LSTM-CNN / VPPV-style monitor from a single
+This upgrade therefore reframes the CNN-LSTM visual-state monitor from a single
 `visual_state_risk` score into a mechanism-separated hierarchical router.
 
 ## Method
@@ -37,7 +37,7 @@ Command:
 
 ```bash
 python modules/mechanism_router.py \
-  --input-csv outputs/vppv_perception_monitor/risk_trace.csv \
+  --input-csv <risk_trace.csv> \
   --output-dir outputs/mechanism_router \
   --action-budget 0.20 \
   --residual-reserve 0.20
@@ -80,8 +80,8 @@ actions:
 
 ## Next Validation Step
 
-The next strong experiment is to replace proxy labels with task-native failure
-evidence: SLAM tracking loss, segmentation quality, depth-estimation error,
-surgical-tool state regression error, simulator rollout failures, or real
-action-outcome residuals. Then evaluate whether the mechanism router improves
-failure capture under a fixed action or human-review budget.
+The next strong experiment is to replace proxy labels with task-native
+industrial failure evidence: human-action misrecognition, worker-zone events,
+depth-estimation dropouts, perception interruption, robot stop/replan logs, or
+real action-outcome residuals. Then evaluate whether the mechanism router
+improves failure capture under a fixed action or human-review budget.

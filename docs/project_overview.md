@@ -10,7 +10,7 @@ extended into reliability-aware robot perception. The research path is:
 5. Runtime risk distillation and route-state monitoring.
 6. Mechanism-separated hierarchical routing with a reserved residual budget.
 7. Primary industrial runtime action monitoring.
-8. Optional transfer to high-risk visual front ends such as VPPV-style systems.
+8. Future visual-to-state consistency checking.
 
 ## Core Question
 
@@ -30,7 +30,6 @@ flowchart LR
     E --> F["Mechanism-separated routing"]
     F --> H["Runtime state machine"]
     H --> G["Industrial runtime action monitor"]
-    G --> I["Optional transfer case"]
 
     C --> C1["TUM RGB-D corruption benchmark"]
     D --> D1["Global / grid / PCA descriptor comparison"]
@@ -38,7 +37,6 @@ flowchart LR
     F --> F1["boundary-first / reserved residual budget"]
     H --> H1["NORMAL / SUSPECT / RECOVER / HUMAN_REVIEW"]
     G --> G1["Continue / re-observe / recover / human confirmation"]
-    I --> I1["High-risk visual front-end case"]
 ```
 
 ## Evidence Summary
@@ -73,8 +71,6 @@ flowchart LR
 - Local and learned descriptors improve pose-awareness, especially for rotation.
 - Reliability scores can be converted into runtime states and recovery actions.
 - Action-outcome residuals extend the project from perception to execution.
-- A VPPV-style visual front end is only a secondary transfer target, not the
-  main project identity.
 
 ## Industrial Runtime Action Monitoring
 
@@ -96,27 +92,30 @@ This is the intended main project output. The current repository implements a
 visual action-recognition model plus a proof-of-concept reliability monitor for
 uncertain industrial perception states, not a validated robot controller.
 
-## Secondary Transfer Case: VPPV-Style Front-End Monitoring
+## Future Extension: Visual-State Consistency
 
-The VPPV-style section demonstrates how the same reliability monitor could
-attach to a different high-risk visual front end. The mapping is:
+The next conceptual extension is a visual-to-state consistency monitor. In that
+setting, camera evidence is first converted into an action or scene state. The
+system then checks whether later visual evidence, temporal motion, depth
+quality, and action-outcome residuals remain consistent with that state.
 
 ```mermaid
 flowchart LR
-    A["Visual parsing / segmentation"] --> E["visual_state_risk"]
-    B["Depth map"] --> E
-    C["Perceptual regressed state"] --> E
-    D["Physical / progress state"] --> E
+    A["Image or video evidence"] --> B["Predicted action / scene state"]
+    B --> E["Consistency evidence"]
+    C["Depth quality"] --> E
+    D["Temporal motion"] --> E
+    J["Action-outcome residual"] --> E
     E --> F["NORMAL: continue"]
-    E --> G["SUSPECT: re-perceive"]
-    E --> H["RECOVER: replan or backup"]
-    E --> I["HUMAN_REVIEW: operator check"]
+    E --> G["SUSPECT: re-observe"]
+    E --> H["RECOVER: pause / replan"]
+    E --> I["HUMAN_REVIEW: operator confirmation"]
 ```
 
-This transfer case preserves the general reliability-monitoring method while
-showing a high-stakes front-end use case. It is not the main application, not a
-VPPV reproduction, and has not been validated on paired surgical policy
-rollouts.
+This is useful for industrial human-robot collaboration because a robot often
+acts on a compact state estimate rather than on the raw image itself. It remains
+a future extension in this repository; the current evidence supports a
+prototype reliability monitor, not closed-loop consistency validation.
 
 ## What It Does Not Prove
 
@@ -125,8 +124,8 @@ rollouts.
 - PCA descriptors are sequence-fitted baselines, not general pretrained models.
 - Runtime state rules are auditable prototypes, not validated industrial
   control policies or formal safety proofs.
-- The VPPV-style case is a secondary transfer framing, not a claim of
-  reproducing VPPV itself.
+- Visual-state consistency checking is proposed as a next extension, not
+  claimed as a completed external-framework validation.
 
 ## Technical Reading Guide
 
@@ -138,7 +137,6 @@ rollouts.
 | Calibration and coverage risk | `modules/calibration_analysis.py` |
 | Runtime state monitoring | `modules/runtime_monitor.py` |
 | Mechanism-separated routing | `docs/mechanism_separated_routing_upgrade.md` |
-| Secondary transfer case | `reports/vppv_perception_reliability_monitor.md` |
 
 ## Best Next Experiment
 

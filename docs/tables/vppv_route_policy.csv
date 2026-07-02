@@ -1,5 +1,0 @@
-monitor_state,state_zh,vppv_action,action_zh,rationale
-NORMAL,正常,continue VPPV policy,继续执行 VPPV policy,visual state is stable enough for normal autonomy
-SUSPECT,可疑,slow down / re-perceive,降低速度，重新运行 visual parsing / depth,visual state changed more than expected but may still be recoverable
-RECOVER,需要恢复,re-estimate state / replan / safe backup,重新估计状态，重新规划，或切换 recovery,visual abnormality may already affect execution
-HUMAN_REVIEW,人工复查,surgeon confirmation / takeover,请求医生确认或接管,state cannot be confirmed automatically before high-consequence action

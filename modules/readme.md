@@ -36,16 +36,12 @@ theme. The recommended reading order is in `docs/experiment_order.md`.
 
 ## Risk Distillation And Runtime Routing
 
-- `run_vppv_perception_monitor.py`: distills depth, temporal, embedding,
-  trajectory, calibration, and coverage-risk signals into `visual_state_risk`;
-  exports feature attribution, signal-group ablation, top-risk explanations,
-  route policy, state counts, and outcome-linked validation. The script name
-  retains the original transfer-case prefix, but the monitor is a general
-  visual-state reliability component.
 - `mechanism_router.py`: upgrades the scalar monitor into boundary-first and
   reserved-residual mechanism routing. It treats embedding, temporal, depth,
   trajectory, progress, and calibration evidence as failure-mechanism signals
   rather than direct class decisions.
 
-The primary project scenario is industrial visual action monitoring. The
-VPPV-style report is retained as a secondary transfer case.
+The primary project scenario is industrial visual action monitoring. A future
+visual-to-state consistency layer could check whether predicted action states
+remain consistent with later visual, depth, temporal, and action-outcome
+evidence.

@@ -2,8 +2,7 @@
 
 This project is a research prototype for industrial visual action recognition
 and reliability-aware robot perception. The main method is visual-state risk
-monitoring for uncertain action or perception states. The VPPV-style section is
-only a secondary transfer case.
+monitoring for uncertain action or perception states.
 
 ## Confirmed By Current Evidence
 
@@ -34,9 +33,8 @@ only a secondary transfer case.
   pretrained RGB-D representation.
 - Calibration scores show strong ranking but should not be interpreted as
   calibrated probabilities without additional calibration work.
-- The primary target is industrial visual action monitoring. The VPPV-style
-  section does not reproduce VPPV and should not be presented as a new VPPV
-  method.
+- The primary target is industrial visual action monitoring. Visual-to-state
+  consistency checking is a future extension, not a completed validation layer.
 - Runtime route rules are transparent engineering rules, not formal safety
   guarantees.
 - Mechanism-routing scores are currently rule-based and validation-oriented.

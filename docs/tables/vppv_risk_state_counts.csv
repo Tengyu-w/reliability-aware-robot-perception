@@ -1,5 +1,0 @@
-monitor_state,count,fraction,vppv_meaning,candidate_action
-NORMAL,1350,0.75,visual state is stable; autonomy can continue,continue_autonomy
-SUSPECT,433,0.24055555555555555,visual state is abnormal; slow down or re-observe,slow_down_or_reobserve
-RECOVER,17,0.009444444444444445,visual abnormality may affect execution; recover or replan,trigger_recovery_or_replan
-HUMAN_REVIEW,0,0.0,state cannot be confirmed; request human review,request_human_review
