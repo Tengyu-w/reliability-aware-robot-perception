@@ -1,156 +1,133 @@
-# Industrial Action Recognition To Reliability-Aware Robot Perception
+# Visual-State Reliability for Industrial Action Recognition and Robot Perception
 
-Research code for industrial sensing and reliability-aware robot perception.
-The project begins with image/video-based human action recognition in an
-industrial setting, then extends that recognition pipeline into a
-reliability-aware visual-state monitoring framework.
+This repository studies how an industrial visual recognition system can be
+extended into a reliability-aware robot perception monitor. The project begins
+with CNN-LSTM human action recognition from image/video sequences, then asks
+whether the same visual pipeline can estimate when its own state estimate is
+too unreliable for autonomous use.
 
-The original system uses a CNN-LSTM network for visual action recognition:
-sample frames from AVI videos, extract image features with a ResNet18 CNN,
-model temporal motion with an LSTM, and output the predicted human action
-class. This part is the sensor/image-recognition foundation of the project.
+The work is a research prototype. It is not a certified safety system, not a
+closed-loop robot validation result, and not a reproduction of any surgical
+autonomy framework.
 
-The later research upgrade asks a second question: after the model recognizes
-an action or visual state, can it also estimate whether that recognition is
-reliable enough for a robot or autonomy system to trust?
+## Core Problem
 
-The central question is therefore not only whether the perception model
-predicts a class or state correctly. The main question is:
+Industrial robot perception cannot stop at recognizing an action or visual
+state. A robot also needs to know when the current visual evidence is unstable,
+out of distribution, corrupted, or inconsistent with downstream execution.
 
-> When should a robot stop trusting its current visual state and trigger
-> re-perception, recovery, replanning, or human review?
+The central question is:
 
-This is a research prototype. It is not a certified safety system, not a
-closed-loop robot safety proof, and not a reproduction of any surgical autonomy
-framework.
+> Can image-sequence recognition, visual embeddings, depth reliability,
+> temporal change, calibration evidence, and action-outcome residuals be turned
+> into an auditable monitor that decides when to continue, re-perceive, recover,
+> replan, or request human review?
 
-## Initial System: Industrial Action Recognition
+## Research Path
 
-The first layer of this project is an industrial visual recognition system.
-It addresses a practical sensing problem: given short video clips or image
-sequences from an industrial/robotic setting, recognize the human action or
-visual activity class.
+The project is organized around a recognition-to-reliability progression:
 
-The implemented baseline is:
+```text
+industrial image/video action recognition
+  -> ResNet18 frame encoder + LSTM temporal classifier
+  -> validation embeddings, confidence, entropy, and margins
+  -> RGB-D/depth corruption and camera-motion stress tests
+  -> local temporal excess scoring for abnormal visual-state changes
+  -> trajectory residuals as downstream action-outcome evidence
+  -> visual_state_risk distillation
+  -> evidence-to-action runtime monitor
+  -> VPPV-style surgical front-end transfer case
+```
+
+This structure keeps the initial visual-recognition capability visible while
+making the reliability upgrade explicit.
+
+## 1. Industrial Action Recognition Baseline
+
+The first system is a CNN-LSTM video classifier for industrial human-action
+recognition. It processes AVI videos or image sequences, samples a fixed number
+of frames, extracts image features, models temporal motion, and predicts an
+action class.
 
 ```text
 AVI video / image sequence
-  -> sample 16 frames
+  -> 16 sampled frames
   -> ResNet18 CNN frame encoder
-  -> LSTM temporal sequence model
+  -> LSTM temporal model
   -> action-class prediction
-  -> validation accuracy, training curves, test predictions, embedding analysis
+  -> training curves, validation accuracy, test predictions
+  -> validation embedding diagnostics
 ```
 
-This stage establishes the visual sensing capability of the project. The system
-processes image sequences, extracts frame-level visual features, models
-temporal motion, and predicts an action class. The later reliability work is
-built on top of this recognition layer: once a model can identify an action or
-visual state, the next question is whether the system can estimate how
-trustworthy that recognition is.
+Relevant code:
 
-The reliability upgrade therefore plays two roles:
+- `modules/main.py`: training and prediction entry point.
+- `modules/model.py`: ResNet18 + LSTM model.
+- `modules/data_loader.py`: frame sampling and video loading.
+- `modules/embedding_analysis.py`: validation embeddings, confidence,
+  entropy, margins, PCA, and distribution summaries.
 
-- It supports recognition quality by analyzing confidence, entropy, margins,
-  embeddings, and feature-fit style evidence.
-- It prepares the recognition model for robot use, where uncertain visual
-  states should trigger re-perception, recovery, replanning, or human review
-  rather than being accepted automatically.
+This stage establishes that the project can process visual sensor data and
+perform temporal action recognition. The later reliability components are built
+around the question of when such recognition should or should not be trusted.
 
-## Project Summary
+## 2. Reliability Question
 
-This project starts from industrial human action recognition with a ResNet18
-CNN plus LSTM video classifier, adds confidence/feature-fit style evidence to
-understand and improve recognition reliability, then extends the same logic
-into a mechanism-separated runtime router for robot perception.
+The reliability layer is motivated by three observations.
 
-The repository is organized around three technical components:
+First, visual embeddings can reveal instability, but embedding separation is
+not by itself a safety guarantee. A representation can look cleaner while the
+downstream decision remains fragile.
 
-- The first capability is visual sequence recognition: image frames, temporal
-  motion, and action-class prediction.
-- `visual_state_risk` is the lightweight reliability evidence score.
-- Mechanism-separated routing is the decision layer: boundary-first visual
-  state review, then a reserved residual budget for other failure mechanisms.
-- VPPV-style surgical autonomy is used as a transfer case, not as the whole
-  project name and not as a claim of surgical validation.
+Second, global clean-reference distance is not a sufficient reliability score
+for robot perception. Normal camera motion, object motion, or tool motion can
+change the visual state without indicating a perception failure.
 
-## Research Development
+Third, perception reliability must be connected to action outcomes. A visual
+state is high risk when it can mislead downstream control, recovery, replanning,
+or human-review decisions.
 
-The project is organized as a staged research program.
+## 3. Evidence Families
 
-1. Build an industrial human-action recognition baseline from AVI video:
-   ResNet18 extracts frame-level image features and an LSTM models the action
-   sequence.
-2. Train and evaluate the classifier with train/validation/test splits,
-   prediction export, training curves, and validation accuracy.
-3. Add recognition-quality analysis: embeddings, confidence, entropy, margins,
-   and feature-fit style diagnostics, so the project can explain which visual
-   sequences are easy or hard for the model.
-4. Inspect embeddings, confidence, and temporal state changes instead of only
-   reporting classification accuracy.
-5. Test RGB-D/depth reliability under controlled corruption and camera motion.
-6. Learn a key negative result: distance from a global clean reference can fail
-   under normal camera motion, so reliability must be local and temporal.
-7. Add waveform-like temporal excess analysis to detect abnormal visual-state
-   changes relative to a local window.
-8. Add action-outcome evidence through trajectory residuals, because visual
-   reliability matters most when it affects downstream execution.
-9. Distill depth, temporal, embedding, trajectory, calibration, and coverage
-   signals into `visual_state_risk`.
-10. Convert scalar risk into auditable runtime states:
-   `NORMAL`, `SUSPECT`, `RECOVER`, and `HUMAN_REVIEW`.
-11. Upgrade the scalar monitor into a mechanism-separated hierarchical router:
-   Stage 1 handles boundary-like visual-state risk; Stage 2 reserves budget
-   for residual mechanisms such as trajectory, depth/signal quality,
-   representation conflict, and progress/calibration inconsistency.
+The project separates reliability evidence into distinct signal families rather
+than treating all uncertainty as one scalar.
 
-The resulting chain is:
+| Evidence family | Measured signals | Reliability role |
+| --- | --- | --- |
+| Visual recognition | predicted class, confidence, entropy, probability margin | Identifies uncertain or low-margin action predictions. |
+| Embedding geometry | validation embeddings, PCA, embedding shift | Detects representation drift and visual-state conflict. |
+| Depth and RGB-D quality | valid-depth ratio, mean depth, depth variance, corruption score | Flags degraded or implausible depth evidence. |
+| Temporal state change | local temporal distance, temporal excess score | Separates abnormal state jumps from normal motion. |
+| Calibration and coverage | calibration gap, coverage-risk ranking | Distinguishes ranking quality from calibrated probability claims. |
+| Action outcome | planned-vs-observed trajectory residual, progress slope | Connects perception reliability to downstream execution. |
 
-```text
-industrial video/action data
-  -> ResNet18 CNN frame recognition
-  -> LSTM temporal action classification
-  -> confidence, embedding, and feature-fit diagnostics
-  -> RGB-D/depth corruption and camera-motion analysis
-  -> local temporal excess scoring
-  -> trajectory residual and downstream outcome evidence
-  -> visual_state_risk distillation
-  -> mechanism-separated runtime routing
-  -> VPPV-style surgical-autonomy transfer case
-```
+This design mirrors the main methodological lesson from the related ECG
+reliability project without reusing its naming scheme: diagnostic evidence
+should generate testable reliability routes, not serve as proof by itself.
 
-## Key Finding
+## 4. Evidence-To-Action Monitor
 
-The central finding is that a reliability project should not stop at a better
-embedding or a single larger model.
+The current runtime design has two layers.
 
-Embedding evidence is useful because it shows when the model's internal visual
-state shifts or conflicts with known states. But a cleaner-looking
-representation does not automatically prove that a downstream robot decision is
-safe. Similarly, a single global distance score can flag normal camera motion
-as abnormal.
+The first layer distills multi-source reliability evidence into
+`visual_state_risk`, a lightweight score that can be computed from visual,
+temporal, depth, trajectory, progress, calibration, and coverage signals.
 
-The final decision policy is therefore not just one risk score. It is a
-mechanism-separated router:
-
-1. A boundary-first branch prioritizes abnormal visual-state changes using
-   temporal excess, embedding shift, local temporal distance, coverage risk,
-   and distilled visual risk.
-2. A residual mechanism branch reserves part of the action budget for
-   trajectory residual, depth/signal quality, representation conflict, and
-   progress/calibration inconsistency.
+The second layer converts risk and dominant evidence type into actions. The
+implementation is intentionally transparent: the monitor exposes why a sample
+is risky and routes it to a matching response.
 
 ```mermaid
 flowchart TD
-    A["Visual sequence or RGB-D state"] --> B["CNN-LSTM / descriptor evidence"]
-    B --> C["Reliability evidence layer"]
+    A["Image sequence / RGB-D state"] --> B["CNN-LSTM and descriptor evidence"]
+    B --> C["Reliability evidence table"]
 
-    C --> D1["Temporal excess"]
+    C --> D1["Recognition confidence"]
     C --> D2["Embedding shift"]
-    C --> D3["Depth validity and corruption"]
-    C --> D4["Trajectory residual"]
-    C --> D5["Calibration / coverage risk"]
-    C --> D6["Progress stagnation"]
+    C --> D3["Depth validity"]
+    C --> D4["Temporal excess"]
+    C --> D5["Trajectory residual"]
+    C --> D6["Calibration / coverage"]
 
     D1 --> E["visual_state_risk"]
     D2 --> E
@@ -159,111 +136,78 @@ flowchart TD
     D5 --> E
     D6 --> E
 
-    E --> F["Stage 1: boundary-first visual-state route"]
-    F -->|high boundary risk| G["re-perceive / request state-set review"]
-    F -->|remaining samples| H["Stage 2: reserved residual router"]
+    E --> F["Runtime route policy"]
+    F --> G1["NORMAL: continue"]
+    F --> G2["SUSPECT: re-perceive"]
+    F --> G3["RECOVER: recover or replan"]
+    F --> G4["HUMAN_REVIEW: operator check"]
 
-    H --> I1["trajectory residual -> recover or replan"]
-    H --> I2["depth/signal issue -> refresh parsing or depth"]
-    H --> I3["representation conflict -> extra observation"]
-    H --> I4["progress/calibration issue -> slow down and recheck"]
-    H --> I5["low risk -> continue autonomy"]
+    E --> H["Reserved-budget route layer"]
+    H --> I1["visual-state jump"]
+    H --> I2["trajectory residual"]
+    H --> I3["depth / signal quality"]
+    H --> I4["representation conflict"]
+    H --> I5["progress / calibration issue"]
 ```
 
-## Method And Evidence Chain
+The route policy is not a formal safety controller. It is an auditable
+research wrapper that turns model evidence into explicit perception actions.
 
-| Stage | What was done | Why it mattered | Main conclusion |
-| --- | --- | --- | --- |
-| 1. CNN-LSTM baseline | ResNet18 frame encoder plus LSTM sequence model. | Establishes a concrete sequential perception starting point. | Classification is only the first layer; reliability needs separate evidence. |
-| 2. Embedding diagnostics | Validation embeddings, PCA, confidence, entropy, and margins. | Tests whether errors and instability have representation structure. | Embeddings are useful diagnostic evidence, not a safety guarantee by themselves. |
-| 3. Synthetic 3D reliability | Controlled depth and point-cloud corruption smoke tests. | Checks whether embedding-risk scoring responds to designed failures. | Multi-seed synthetic depth reliability gives a reproducible signal. |
-| 4. Real RGB-D corruption | TUM RGB-D depth profiles with controlled corruption. | Moves from synthetic scenes to real depth frames. | Designed corruptions are detectable, but this is still proxy reliability evidence. |
-| 5. Camera-motion audit | Global, grid, and PCA depth descriptors compared against pose change. | Normal robot/camera motion can look like distribution shift. | Global clean-reference distance fails; local and learned descriptors are more promising. |
-| 6. Temporal excess | Local window normalization around the current frame. | Reliability should ask whether the current change is abnormal locally. | Temporal excess separates abnormal state changes better than global reference distance. |
-| 7. Calibration and coverage | Coverage-risk and calibration-style analyses. | A monitor needs ranking quality and probability caution. | Risk ranking can be strong while raw scores remain poorly calibrated probabilities. |
-| 8. Trajectory residual | Planned-vs-observed action outcome residual demo. | Perception reliability matters because it affects execution. | Residuals provide downstream failure evidence beyond visual descriptors. |
-| 9. Risk distillation | Random forest, logistic regression, and decision-tree models distilled multi-source signals into `visual_state_risk`. | Heavy analysis must become a lightweight runtime signal. | A compact monitor can approximate richer reliability evidence. |
-| 10. Runtime state machine | Risk scores mapped to `NORMAL`, `SUSPECT`, `RECOVER`, `HUMAN_REVIEW`. | Robot systems need auditable actions, not only plots. | Continuous risk can become transparent autonomy states. |
-| 11. Mechanism router | Boundary-first route plus reserved residual budget. | Different failure mechanisms need different actions. | This is the clearest current decision layer and the best place to extend the project. |
+## 5. Main Findings
 
-## Key Results Snapshot
+| Claim | Evidence | Interpretation |
+| --- | --- | --- |
+| CNN-LSTM provides the initial visual recognition layer. | ResNet18 frame encoder, LSTM sequence model, validation metrics, and exported predictions. | The project begins with image-sequence recognition rather than only post-hoc uncertainty analysis. |
+| Controlled depth corruptions are detectable. | TUM RGB-D source-paired corruption benchmark, 300 depth files and 1800 samples. | The reliability pipeline detects designed depth failures, but this remains proxy evidence. |
+| Global clean-reference distance can fail under camera motion. | TUM scene-conditioned baseline ROC-AUC 0.483. | Robot visual reliability should not be defined only as distance from a global clean state. |
+| Local temporal normalization improves reliability scoring. | Temporal excess benchmark with +/- 5 frame local window, ROC-AUC 1.000. | Abnormal visual-state changes are better evaluated relative to local motion context. |
+| Risk ranking is stronger than probability calibration. | TUM calibration analysis: ROC-AUC 1.000 with ECE gap 0.758. | Scores can rank risk well without being calibrated probabilities. |
+| Action residuals provide execution-facing evidence. | Synthetic planned-vs-observed trajectory residual demo, ROC-AUC 0.990. | Reliability monitoring should connect perception to downstream outcomes. |
+| Multi-source risk can be distilled into a compact runtime score. | VPPV-style risk distillation, Random Forest distillation ROC-AUC 0.992. | `visual_state_risk` approximates heavier reliability evidence. |
+| A fixed-budget router can prioritize high-risk states. | 20% action budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW states. | The monitor supports review or recovery triage under limited action budget. |
+
+The CSV version of the result snapshot is stored in
+`docs/tables/key_results.csv`.
+
+## 6. Current Evidence Snapshot
 
 | Evidence layer | Setup | Result | Interpretation |
 | --- | ---: | ---: | --- |
-| CNN-LSTM action recognition | AVI video/image sequences | ResNet18 frame encoder + LSTM temporal classifier | Demonstrates the original image-sequence recognition capability. |
-| Risk distillation | 1800 aligned visual/action samples | Random Forest distillation ROC-AUC 0.992 | `visual_state_risk` approximates heavier reliability evidence. |
-| Runtime route states | Distilled risk trace | 1350 NORMAL / 433 SUSPECT / 17 RECOVER / 0 HUMAN_REVIEW | Visual risk becomes concrete autonomy routing. |
-| Outcome link | Distilled risk vs residual signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | The risk score is decision-relevant, not only fitted to the distillation target. |
-| Mechanism router | 1800 aligned visual/action samples | 20% budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW | Scalar risk is split into boundary-first and residual mechanism routes. |
-| Synthetic 3D reliability | 3 seeds, 8 samples per scene | ROC-AUC 0.804 +/- 0.028 | Embedding risk gives a reproducible smoke-test signal. |
+| CNN-LSTM action recognition | AVI video/image sequences | ResNet18 frame encoder + LSTM temporal classifier | Initial image-sequence recognition capability. |
+| Risk distillation | 1800 aligned visual/action samples | Random Forest distillation ROC-AUC 0.992 | Compact risk score approximates richer reliability evidence. |
+| Runtime route states | Distilled risk trace | 1350 NORMAL / 433 SUSPECT / 17 RECOVER / 0 HUMAN_REVIEW | Continuous risk becomes auditable autonomy routing. |
+| Outcome link | Distilled risk vs residual signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | Risk is decision-relevant, not only fitted to the distillation target. |
+| Reserved-budget router | 1800 aligned visual/action samples | 20% budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW | Scalar risk is decomposed into route-specific actions. |
+| Synthetic 3D reliability | 3 seeds, 8 samples per scene | ROC-AUC 0.804 +/- 0.028 | Embedding-risk scoring gives a reproducible smoke-test signal. |
 | TUM RGB-D corruption | 300 depth files, 1800 samples | Source-paired ROC-AUC 1.000 | Controlled corruptions are detectable in this setup. |
 | TUM scene-conditioned baseline | Same TUM run | ROC-AUC 0.483 | Global clean references fail under normal camera motion. |
 | TUM temporal reliability | +/- 5 frame window | Temporal excess ROC-AUC 1.000 | Local temporal normalization improves reliability scoring. |
 | Pose-aware global descriptor | 299 adjacent frame pairs | Rotation corr. 0.061 | Global statistics are weakly pose-aware. |
 | Pose-aware grid descriptor | 299 adjacent frame pairs | Rotation corr. 0.275 | Local layout improves rotation sensitivity. |
 | PCA depth descriptor | 32 components | Rotation corr. 0.540 | Lightweight learned depth descriptors are more promising. |
-| Runtime monitor | 1800 TUM temporal samples | 1350 NORMAL / 423 SUSPECT / 27 RECOVER | Scores can be converted into auditable runtime states. |
 | Calibration | TUM temporal risk scores | ROC-AUC 1.000; ECE gap 0.758 | Ranking is strong, but raw scores are not calibrated probabilities. |
 | Trajectory residual | 400 synthetic action-outcome samples | ROC-AUC 0.990 | Planned-vs-observed residuals detect execution failures. |
 
-The CSV version of this table is in
-[`docs/tables/key_results.csv`](docs/tables/key_results.csv).
+## 7. Transfer Case: VPPV-Style Front-End Monitoring
 
-## What Was Learned From The VTVF Upgrade
+The VPPV-style section is a transfer case for high-stakes visual front-end
+monitoring. It does not rename the project and does not claim to reproduce or
+validate VPPV.
 
-This project follows a research lesson from the VT/VF ECG reliability work:
-do not confuse representation improvement with reliability.
-
-In the ECG project, better-looking VT/VF embeddings did not always reduce
-dangerous boundary mistakes. Some interventions improved geometry while moving
-errors into another clinically important direction. The useful move was to
-turn evidence families into mechanism-specific review routing.
-
-The same logic applies here:
-
-- A CNN-LSTM embedding can expose visual-state conflict, but it is not the
-  final decision rule.
-- Depth corruption, temporal excess, trajectory residual, calibration risk,
-  and progress stagnation are different evidence families.
-- A robot should not route every high-risk sample the same way. Some cases need
-  re-perception; some need recovery or replanning; some need extra observation;
-  some should slow down and recheck state.
-
-The latest implementation of this design is
-[`modules/mechanism_router.py`](modules/mechanism_router.py), with the method
-summary in
-[`docs/mechanism_separated_routing_upgrade.md`](docs/mechanism_separated_routing_upgrade.md).
-
-## VPPV-Style Transfer Case
-
-The VPPV-style section is a transfer case for surgical-autonomy front-end
-monitoring. It is not the name of the whole project and does not claim to
-reproduce VPPV.
-
-VPPV-style autonomy depends on segmentation masks, depth maps, regressed
-perceptual states, physical state vectors, and downstream policy execution.
-This project asks whether the reliability monitor can sit beside that front
-end and decide whether visual evidence is stable enough for the policy to
-trust.
-
-| VPPV-style front-end dependency | Monitor evidence in this project |
+| Front-end dependency | Monitor evidence |
 | --- | --- |
-| Depth map | depth validity, mean depth, depth variance, depth corruption score |
-| Perceptual state / embedding | embedding shift and local temporal state change |
-| Physical or task progress state | progress slope and progress stagnation score |
-| Action outcome consistency | trajectory residual between planned and observed motion |
-| Runtime autonomy decision | `NORMAL`, `SUSPECT`, `RECOVER`, `HUMAN_REVIEW`, or mechanism-specific route |
+| Depth map | valid-depth ratio, mean depth, depth variance, corruption score |
+| Perceptual state or embedding | embedding shift, local temporal state change |
+| Physical or task progress state | progress slope, progress stagnation |
+| Action outcome consistency | planned-vs-observed trajectory residual |
+| Runtime autonomy decision | `NORMAL`, `SUSPECT`, `RECOVER`, `HUMAN_REVIEW`, or route-specific review |
 
-The careful claim is:
+The careful claim is that the monitor is compatible with a VPPV-style visual
+front end as a reliability wrapper. It has not been validated on paired
+surgical robot logs, real segmentation masks, VPPV policy rollouts, or clinical
+deployment data.
 
-> The monitor is VPPV-compatible as a visual-state reliability wrapper, but it
-> has not been validated on paired surgical robot logs, segmentation masks,
-> VPPV policy rollouts, or real clinical deployment data.
-
-## Selected Figures
-
-These figures are copied from local experiment outputs so the repository can
-show representative evidence without committing the full `outputs/` directory.
+## 8. Selected Visual Evidence
 
 | Reliability monitor architecture | Visual risk dashboard |
 | --- | --- |
@@ -285,42 +229,37 @@ show representative evidence without committing the full `outputs/` directory.
 | --- | --- |
 | ![TUM risk calibration](docs/figures/tum_risk_calibration.png) | ![Trajectory residual examples](docs/figures/trajectory_residual_examples.png) |
 
-More selected figures are listed in [`docs/figures/README.md`](docs/figures/README.md).
+More selected figures are listed in `docs/figures/README.md`.
 
-## Repository Guide
-
-| Document | Purpose |
-| --- | --- |
-| [`docs/project_overview.md`](docs/project_overview.md) | Technical overview of the research question and pipeline. |
-| [`docs/mechanism_separated_routing_upgrade.md`](docs/mechanism_separated_routing_upgrade.md) | Latest VTVF-inspired mechanism-routing upgrade. |
-| [`reports/vppv_perception_reliability_monitor.md`](reports/vppv_perception_reliability_monitor.md) | Detailed VPPV-style surgical-autonomy transfer case. |
-| [`docs/VISUAL_EVIDENCE_INDEX.md`](docs/VISUAL_EVIDENCE_INDEX.md) | Public figure and table index. |
-| [`docs/experiment_order.md`](docs/experiment_order.md) | Recommended order for reading and rerunning experiments. |
-| [`docs/limitations.md`](docs/limitations.md) | Scope, limitations, and next validation steps. |
-| [`modules/readme.md`](modules/readme.md) | Code map by experimental component. |
-
-## Code Map
+## 9. Repository Map
 
 ```text
 modules/
-  main.py                              # CNN-LSTM training and prediction entry point
-  model.py                             # ResNet18 + LSTM model
-  embedding_analysis.py                # Sequential embedding diagnostics
-  robot_3d_reliability.py              # Depth/point-cloud reliability utilities
-  run_robot_3d_demo.py                 # Synthetic 3D reliability demo
-  run_robot_3d_multiseed.py            # Multi-seed synthetic benchmark
-  run_robot_3d_pipeline.py             # Real-depth profile + corruption benchmark
-  run_temporal_depth_benchmark.py      # Temporal local-reference reliability
-  run_tum_pose_embedding_analysis.py   # Global/grid descriptor pose analysis
-  run_tum_pca_depth_descriptor.py      # PCA depth descriptor baseline
-  calibration_analysis.py              # Calibration and coverage-risk analysis
-  trajectory_residual_demo.py          # Action-outcome residual reliability demo
-  runtime_monitor.py                   # Converts risk scores into runtime states
-  run_vppv_perception_monitor.py       # Risk distillation and transfer case
-  mechanism_router.py                  # Boundary-first and reserved-residual routing
+  main.py                              CNN-LSTM training and prediction entry point
+  model.py                             ResNet18 + LSTM model
+  data_loader.py                       Video loading and frame sampling
+  embedding_analysis.py                Embedding, confidence, entropy, PCA diagnostics
+  robot_3d_reliability.py              Depth/point-cloud reliability utilities
+  run_temporal_depth_benchmark.py      Local temporal-reference reliability
+  run_tum_pose_embedding_analysis.py   Global/grid descriptor pose sensitivity
+  run_tum_pca_depth_descriptor.py      PCA depth descriptor baseline
+  calibration_analysis.py              Calibration and coverage-risk analysis
+  trajectory_residual_demo.py          Action-outcome residual reliability demo
+  runtime_monitor.py                   Risk scores to runtime states
+  run_vppv_perception_monitor.py       Risk distillation and transfer case
+  mechanism_router.py                  Reserved-budget route policy
+
+docs/
+  project_overview.md                  Technical overview
+  mechanism_separated_routing_upgrade.md
+  limitations.md                       Evidence boundary and next validation steps
+  VISUAL_EVIDENCE_INDEX.md             Public figure and table index
+
+reports/
+  vppv_perception_reliability_monitor.md
 ```
 
-## Minimal Reproduction
+## 10. Reproduce Key Runs
 
 Install dependencies:
 
@@ -328,8 +267,7 @@ Install dependencies:
 pip install -r modules/requirements.txt
 ```
 
-Synthetic 3D and trajectory-residual experiments can be run without a robot
-dataset:
+Synthetic 3D and trajectory-residual smoke tests:
 
 ```bash
 python modules/run_robot_3d_demo.py --output-dir outputs/robot_3d_demo
@@ -337,7 +275,7 @@ python modules/run_robot_3d_multiseed.py --output-dir outputs/robot_3d_multiseed
 python modules/trajectory_residual_demo.py --output-dir outputs/trajectory_residual_demo
 ```
 
-For the TUM RGB-D workflow:
+TUM RGB-D reliability workflow:
 
 ```bash
 python modules/download_tum_rgbd_sample.py \
@@ -357,7 +295,11 @@ python modules/runtime_monitor.py \
   --input-csv outputs/tum_rgbd_freiburg1_desk_temporal/temporal_depth_embeddings.csv \
   --output-dir outputs/tum_rgbd_runtime_monitor \
   --score-column temporal_excess_score
+```
 
+Risk distillation and route-policy run:
+
+```bash
 python modules/run_vppv_perception_monitor.py
 
 python modules/mechanism_router.py \
@@ -368,26 +310,27 @@ python modules/mechanism_router.py \
 ```
 
 Raw data, prepared subsets, checkpoints, and generated outputs are intentionally
-not tracked by Git. See [`data/README.md`](data/README.md).
+not tracked by Git. See `data/README.md`.
 
-## What This Does Not Prove
+## Evidence Boundary
 
-- It does not prove closed-loop robot safety.
-- It does not validate a surgical autonomy system on real surgical rollouts.
-- Current labels are proxy reliability labels, not natural task failure labels.
-- Controlled corruptions do not replace real failures caused by lighting,
-  occlusion, tissue deformation, smoke, blur, sensor degradation, or policy
+- Current reliability labels are proxy labels, not natural task-failure labels.
+- Controlled corruptions do not replace real perception failures caused by
+  lighting, occlusion, deformation, smoke, blur, sensor degradation, or policy
   mistakes.
-- PCA descriptors are diagnostic baselines, not general pretrained RGB-D
-  representations.
-- Runtime states and mechanism routes are transparent research rules, not
-  formal safety guarantees.
+- Temporal and depth benchmarks show internal evidence, not closed-loop robot
+  safety.
+- Calibration results support risk ranking, not calibrated probability
+  deployment.
+- The VPPV-style section is a transfer case, not surgical system validation.
+- Runtime states and route policies are transparent research rules, not formal
+  safety guarantees.
 
-## Best Next Experiment
+## Next Validation Step
 
-Replace proxy labels with task-native failure evidence: robot-log failures,
-SLAM tracking loss, segmentation-mask quality, depth-estimation error,
-surgical-tool state regression error, simulator rollouts, or real
-action-outcome residuals. Then evaluate whether `visual_state_risk` and the
-mechanism router improve failure capture under a fixed action or human-review
-budget.
+The strongest next experiment is to replace proxy labels with task-native
+failure evidence: robot logs, SLAM tracking loss, segmentation quality,
+depth-estimation error, surgical-tool state regression error, simulator
+rollouts, or real action-outcome residuals. The key evaluation should ask
+whether `visual_state_risk` and the route policy improve failure capture under
+a fixed action or human-review budget.
