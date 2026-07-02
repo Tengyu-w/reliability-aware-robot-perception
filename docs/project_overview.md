@@ -15,9 +15,9 @@ extended into reliability-aware robot perception. The research path is:
 ## Core Question
 
 Can an industrial action-recognition model be upgraded with depth, temporal,
-embedding, trajectory, calibration, and coverage-risk evidence so that the
-system knows when to continue, re-observe the worker, pause or recover the
-robot action, or request human confirmation?
+embedding, trajectory, calibration, and coverage-risk evidence so that a
+prototype monitor can indicate when to continue, re-observe the worker, pause
+or recover the robot action, or request human confirmation?
 
 ## Pipeline
 
@@ -63,7 +63,7 @@ flowchart LR
 ## What This Shows
 
 - The project is best described as an industrial action-recognition pipeline
-  upgraded with a reliability monitor.
+  upgraded with a prototype reliability monitor.
 - `visual_state_risk` distills heavier reliability evidence into a lightweight
   runtime score.
 - Mechanism-separated routing keeps embedding, temporal, depth, trajectory, and
@@ -92,8 +92,9 @@ flowchart LR
     C --> G["HUMAN_REVIEW: operator confirmation"]
 ```
 
-This is the main project output: a visual action-recognition model plus a
-runtime reliability monitor for uncertain industrial perception states.
+This is the intended main project output. The current repository implements a
+visual action-recognition model plus a proof-of-concept reliability monitor for
+uncertain industrial perception states, not a validated robot controller.
 
 ## Secondary Transfer Case: VPPV-Style Front-End Monitoring
 
@@ -122,7 +123,8 @@ rollouts.
 - It does not prove closed-loop robot safety.
 - Controlled corruptions do not replace real task failure labels.
 - PCA descriptors are sequence-fitted baselines, not general pretrained models.
-- Runtime state rules are auditable prototypes, not formal safety proofs.
+- Runtime state rules are auditable prototypes, not validated industrial
+  control policies or formal safety proofs.
 - The VPPV-style case is a secondary transfer framing, not a claim of
   reproducing VPPV itself.
 

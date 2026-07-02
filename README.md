@@ -11,6 +11,15 @@ The work is a research prototype. It is not a certified safety system, not a
 closed-loop robot validation result, and not a reproduction of any external
 autonomy framework.
 
+## Current Maturity
+
+| Layer | Current status | Claim level |
+| --- | --- | --- |
+| CNN-LSTM visual action recognition | Implemented training, prediction, and embedding diagnostics. | Implemented baseline. |
+| Reliability evidence analysis | Implemented with confidence, entropy, embeddings, temporal/depth signals, calibration, and residual proxies. | Research prototype evidence. |
+| Graded runtime response | Implemented as a rule-based / fixed-budget routing demo. | Proof-of-concept monitor, not validated industrial control. |
+| Industrial closed-loop validation | Not yet performed with real workcell robot logs or task failures. | Future work. |
+
 ## Core Problem
 
 Industrial human-robot interaction cannot stop at recognizing that a worker is
@@ -22,8 +31,9 @@ should not blindly continue the same behavior.
 The central question is:
 
 > Can an industrial action-recognition model be upgraded with reliability
-> evidence so that the system knows when to continue, re-observe the worker,
-> pause or recover the robot action, or request human confirmation?
+> evidence so that a prototype monitor can indicate when to continue,
+> re-observe the worker, pause or recover the robot action, or request human
+> confirmation?
 
 ## Research Path
 
@@ -37,7 +47,7 @@ industrial image/video action recognition
   -> local temporal excess scoring for abnormal visual-state changes
   -> trajectory residuals as downstream action-outcome evidence
   -> visual_state_risk distillation
-  -> evidence-to-action monitor for industrial runtime decisions
+  -> proof-of-concept evidence-to-action monitor
   -> optional high-risk visual-front-end transfer case
 ```
 
@@ -89,7 +99,7 @@ Third, perception reliability must be connected to action outcomes. A visual
 state is high risk when it can mislead downstream control, recovery, replanning,
 or human-review decisions.
 
-The practical industrial decision layer is:
+The proposed industrial decision layer is:
 
 | Monitor state | Industrial interpretation | Candidate response |
 | --- | --- | --- |
@@ -118,7 +128,7 @@ should generate testable reliability routes, not serve as proof by itself.
 
 ## 4. Evidence-To-Action Monitor
 
-The current runtime design has two layers.
+The current proof-of-concept runtime design has two layers.
 
 The first layer distills multi-source reliability evidence into
 `visual_state_risk`, a lightweight score that can be computed from visual,
@@ -161,9 +171,9 @@ flowchart TD
     H --> I5["progress / calibration issue"]
 ```
 
-The route policy is not a formal safety controller. It is an auditable
-research wrapper that turns action-recognition evidence into explicit runtime
-responses.
+The route policy is not a formal safety controller and has not been validated
+in a real industrial robot loop. It is an auditable research wrapper that turns
+action-recognition evidence into explicit candidate runtime responses.
 
 ## 5. Main Findings
 
@@ -177,7 +187,7 @@ responses.
 | Risk ranking is stronger than probability calibration. | TUM calibration analysis: ROC-AUC 1.000 with ECE gap 0.758. | Scores can rank risk well without being calibrated probabilities. |
 | Action residuals provide execution-facing evidence. | Synthetic planned-vs-observed trajectory residual demo, ROC-AUC 0.990. | Reliability monitoring should connect perception to downstream outcomes. |
 | Multi-source risk can be distilled into a compact runtime score. | Visual-state risk distillation, Random Forest distillation ROC-AUC 0.992. | `visual_state_risk` approximates heavier reliability evidence. |
-| A fixed-budget router can prioritize high-risk states. | 20% action budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW states. | The monitor supports review or recovery triage under limited action budget. |
+| A fixed-budget router can prioritize high-risk states in a demo setting. | 20% action budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW states. | The monitor demonstrates review or recovery triage logic under limited action budget. |
 
 The CSV version of the result snapshot is stored in
 `docs/tables/key_results.csv`.
@@ -222,9 +232,9 @@ worker image sequence
        HUMAN_REVIEW request operator confirmation
 ```
 
-This is the project-level output: a visual action-recognition pipeline with a
-runtime reliability monitor that prevents uncertain visual states from being
-treated as ordinary confident predictions.
+This is the intended project-level output. In the current repository, the
+graded response layer is a proof-of-concept monitor built from proxy evidence,
+not a validated industrial robot controller.
 
 ## 8. Secondary Transfer Case: VPPV-Style Front-End Monitoring
 

@@ -24,6 +24,8 @@ only a secondary transfer case.
 ## Not Yet Proven
 
 - The system has not been validated in closed-loop robot control.
+- The graded runtime response layer is currently a rule-based proof-of-concept
+  demo, not a validated industrial robot policy.
 - Current labels are proxy reliability labels, not natural task failure labels.
 - Controlled depth corruptions are not the same as real-world perception
   failures caused by lighting, occlusion, tissue deformation, smoke, blur, or
