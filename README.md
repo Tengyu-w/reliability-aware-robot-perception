@@ -2,26 +2,28 @@
 
 This repository studies how an industrial visual recognition system can be
 extended into a reliability-aware robot perception monitor. The project begins
-with CNN-LSTM human action recognition from image/video sequences, then asks
-whether the same visual pipeline can estimate when its own state estimate is
-too unreliable for autonomous use.
+with CNN-LSTM human action recognition from image/video sequences in an
+industrial workcell, then asks whether the same visual pipeline can estimate
+when its own action or visual-state estimate is too unreliable for autonomous
+use.
 
 The work is a research prototype. It is not a certified safety system, not a
-closed-loop robot validation result, and not a reproduction of any surgical
+closed-loop robot validation result, and not a reproduction of any external
 autonomy framework.
 
 ## Core Problem
 
-Industrial robot perception cannot stop at recognizing an action or visual
-state. A robot also needs to know when the current visual evidence is unstable,
-out of distribution, corrupted, or inconsistent with downstream execution.
+Industrial human-robot interaction cannot stop at recognizing that a worker is
+reaching, placing, assembling, waiting, or entering a work zone. A robot also
+needs to know whether the current action estimate is reliable enough to use.
+If the action is misrecognized or visually ambiguous, the downstream system
+should not blindly continue the same behavior.
 
 The central question is:
 
-> Can image-sequence recognition, visual embeddings, depth reliability,
-> temporal change, calibration evidence, and action-outcome residuals be turned
-> into an auditable monitor that decides when to continue, re-perceive, recover,
-> replan, or request human review?
+> Can an industrial action-recognition model be upgraded with reliability
+> evidence so that the system knows when to continue, re-observe the worker,
+> pause or recover the robot action, or request human confirmation?
 
 ## Research Path
 
@@ -35,8 +37,8 @@ industrial image/video action recognition
   -> local temporal excess scoring for abnormal visual-state changes
   -> trajectory residuals as downstream action-outcome evidence
   -> visual_state_risk distillation
-  -> evidence-to-action runtime monitor
-  -> VPPV-style surgical front-end transfer case
+  -> evidence-to-action monitor for industrial runtime decisions
+  -> optional high-risk visual-front-end transfer case
 ```
 
 This structure keeps the initial visual-recognition capability visible while
@@ -75,17 +77,26 @@ around the question of when such recognition should or should not be trusted.
 
 The reliability layer is motivated by three observations.
 
-First, visual embeddings can reveal instability, but embedding separation is
+First, a wrong action label can change the robot response. If a worker's action
+is uncertain, the system may need another observation instead of continuing
+from a possibly wrong state.
+
+Second, visual embeddings can reveal instability, but embedding separation is
 not by itself a safety guarantee. A representation can look cleaner while the
 downstream decision remains fragile.
-
-Second, global clean-reference distance is not a sufficient reliability score
-for robot perception. Normal camera motion, object motion, or tool motion can
-change the visual state without indicating a perception failure.
 
 Third, perception reliability must be connected to action outcomes. A visual
 state is high risk when it can mislead downstream control, recovery, replanning,
 or human-review decisions.
+
+The practical industrial decision layer is:
+
+| Monitor state | Industrial interpretation | Candidate response |
+| --- | --- | --- |
+| `NORMAL` | Action estimate is stable and consistent. | Continue the planned robot or monitoring behavior. |
+| `SUSPECT` | Recognition evidence is weak, changing, or visually inconsistent. | Re-observe the worker, slow down, or request another frame/window. |
+| `RECOVER` | Visual state may already be affecting execution. | Pause, recover, replan, or return to a safer robot state. |
+| `HUMAN_REVIEW` | The system cannot confirm the worker/action state automatically. | Ask an operator to confirm before continuing. |
 
 ## 3. Evidence Families
 
@@ -99,7 +110,7 @@ than treating all uncertainty as one scalar.
 | Depth and RGB-D quality | valid-depth ratio, mean depth, depth variance, corruption score | Flags degraded or implausible depth evidence. |
 | Temporal state change | local temporal distance, temporal excess score | Separates abnormal state jumps from normal motion. |
 | Calibration and coverage | calibration gap, coverage-risk ranking | Distinguishes ranking quality from calibrated probability claims. |
-| Action outcome | planned-vs-observed trajectory residual, progress slope | Connects perception reliability to downstream execution. |
+| Action outcome | planned-vs-observed trajectory residual, progress slope | Connects recognition reliability to downstream execution. |
 
 This design mirrors the main methodological lesson from the related ECG
 reliability project without reusing its naming scheme: diagnostic evidence
@@ -137,10 +148,10 @@ flowchart TD
     D6 --> E
 
     E --> F["Runtime route policy"]
-    F --> G1["NORMAL: continue"]
-    F --> G2["SUSPECT: re-perceive"]
-    F --> G3["RECOVER: recover or replan"]
-    F --> G4["HUMAN_REVIEW: operator check"]
+    F --> G1["NORMAL: continue task"]
+    F --> G2["SUSPECT: re-observe worker/action"]
+    F --> G3["RECOVER: pause, recover, or replan"]
+    F --> G4["HUMAN_REVIEW: operator confirmation"]
 
     E --> H["Reserved-budget route layer"]
     H --> I1["visual-state jump"]
@@ -151,19 +162,21 @@ flowchart TD
 ```
 
 The route policy is not a formal safety controller. It is an auditable
-research wrapper that turns model evidence into explicit perception actions.
+research wrapper that turns action-recognition evidence into explicit runtime
+responses.
 
 ## 5. Main Findings
 
 | Claim | Evidence | Interpretation |
 | --- | --- | --- |
 | CNN-LSTM provides the initial visual recognition layer. | ResNet18 frame encoder, LSTM sequence model, validation metrics, and exported predictions. | The project begins with image-sequence recognition rather than only post-hoc uncertainty analysis. |
+| Low-confidence or unstable recognition should not be treated as a normal action estimate. | Confidence, entropy, margin, embedding, and temporal diagnostics are exported after validation. | The system can separate action prediction from action reliability. |
 | Controlled depth corruptions are detectable. | TUM RGB-D source-paired corruption benchmark, 300 depth files and 1800 samples. | The reliability pipeline detects designed depth failures, but this remains proxy evidence. |
 | Global clean-reference distance can fail under camera motion. | TUM scene-conditioned baseline ROC-AUC 0.483. | Robot visual reliability should not be defined only as distance from a global clean state. |
 | Local temporal normalization improves reliability scoring. | Temporal excess benchmark with +/- 5 frame local window, ROC-AUC 1.000. | Abnormal visual-state changes are better evaluated relative to local motion context. |
 | Risk ranking is stronger than probability calibration. | TUM calibration analysis: ROC-AUC 1.000 with ECE gap 0.758. | Scores can rank risk well without being calibrated probabilities. |
 | Action residuals provide execution-facing evidence. | Synthetic planned-vs-observed trajectory residual demo, ROC-AUC 0.990. | Reliability monitoring should connect perception to downstream outcomes. |
-| Multi-source risk can be distilled into a compact runtime score. | VPPV-style risk distillation, Random Forest distillation ROC-AUC 0.992. | `visual_state_risk` approximates heavier reliability evidence. |
+| Multi-source risk can be distilled into a compact runtime score. | Visual-state risk distillation, Random Forest distillation ROC-AUC 0.992. | `visual_state_risk` approximates heavier reliability evidence. |
 | A fixed-budget router can prioritize high-risk states. | 20% action budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW states. | The monitor supports review or recovery triage under limited action budget. |
 
 The CSV version of the result snapshot is stored in
@@ -188,11 +201,36 @@ The CSV version of the result snapshot is stored in
 | Calibration | TUM temporal risk scores | ROC-AUC 1.000; ECE gap 0.758 | Ranking is strong, but raw scores are not calibrated probabilities. |
 | Trajectory residual | 400 synthetic action-outcome samples | ROC-AUC 0.990 | Planned-vs-observed residuals detect execution failures. |
 
-## 7. Transfer Case: VPPV-Style Front-End Monitoring
+## 7. Primary Use Case: Industrial Runtime Action Monitoring
 
-The VPPV-style section is a transfer case for high-stakes visual front-end
-monitoring. It does not rename the project and does not claim to reproduce or
-validate VPPV.
+The primary application scenario is an industrial workcell or human-robot
+collaboration setting. A camera-based system recognizes worker actions or
+visual activity states. The reliability monitor then decides whether the
+recognized state can be used directly.
+
+Example runtime logic:
+
+```text
+worker image sequence
+  -> CNN-LSTM predicts action/state
+  -> reliability evidence checks confidence, embedding, temporal consistency,
+     depth quality, and action-outcome consistency
+  -> route decision:
+       NORMAL       continue task
+       SUSPECT      re-observe or slow down
+       RECOVER      pause / recover / replan
+       HUMAN_REVIEW request operator confirmation
+```
+
+This is the project-level output: a visual action-recognition pipeline with a
+runtime reliability monitor that prevents uncertain visual states from being
+treated as ordinary confident predictions.
+
+## 8. Secondary Transfer Case: VPPV-Style Front-End Monitoring
+
+The VPPV-style section is kept only as a secondary transfer case for
+high-stakes visual front-end monitoring. It does not rename the project and
+does not claim to reproduce or validate VPPV.
 
 | Front-end dependency | Monitor evidence |
 | --- | --- |
@@ -207,7 +245,7 @@ front end as a reliability wrapper. It has not been validated on paired
 surgical robot logs, real segmentation masks, VPPV policy rollouts, or clinical
 deployment data.
 
-## 8. Selected Visual Evidence
+## 9. Selected Visual Evidence
 
 | Reliability monitor architecture | Visual risk dashboard |
 | --- | --- |
@@ -231,7 +269,7 @@ deployment data.
 
 More selected figures are listed in `docs/figures/README.md`.
 
-## 9. Repository Map
+## 10. Repository Map
 
 ```text
 modules/
@@ -259,7 +297,7 @@ reports/
   vppv_perception_reliability_monitor.md
 ```
 
-## 10. Reproduce Key Runs
+## 11. Reproduce Key Runs
 
 Install dependencies:
 
@@ -322,15 +360,16 @@ not tracked by Git. See `data/README.md`.
   safety.
 - Calibration results support risk ranking, not calibrated probability
   deployment.
-- The VPPV-style section is a transfer case, not surgical system validation.
+- The primary target is industrial visual action monitoring; the VPPV-style
+  section is only a secondary transfer case, not surgical system validation.
 - Runtime states and route policies are transparent research rules, not formal
   safety guarantees.
 
 ## Next Validation Step
 
 The strongest next experiment is to replace proxy labels with task-native
-failure evidence: robot logs, SLAM tracking loss, segmentation quality,
-depth-estimation error, surgical-tool state regression error, simulator
-rollouts, or real action-outcome residuals. The key evaluation should ask
-whether `visual_state_risk` and the route policy improve failure capture under
-a fixed action or human-review budget.
+industrial evidence: human-action misrecognition cases, worker-zone events,
+robot stop/replan logs, near-miss annotations, perception dropouts, or real
+action-outcome residuals. The key evaluation should ask whether
+`visual_state_risk` and the route policy improve unsafe or incorrect action
+handling under a fixed re-observation, recovery, or human-review budget.

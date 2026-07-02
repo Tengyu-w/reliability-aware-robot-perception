@@ -1,7 +1,7 @@
 # Project Overview
 
-This repository is framed as a reliability-aware sequential robot perception
-project. The research path is:
+This repository is framed as an industrial visual action recognition project
+extended into reliability-aware robot perception. The research path is:
 
 1. CNN-LSTM sequence perception.
 2. Embedding and temporal-state diagnostics.
@@ -9,14 +9,15 @@ project. The research path is:
 4. Waveform-like temporal excess analysis for abnormal state changes.
 5. Runtime risk distillation and route-state monitoring.
 6. Mechanism-separated hierarchical routing with a reserved residual budget.
-7. Optional transfer to surgical autonomy front ends such as VPPV-style systems.
+7. Primary industrial runtime action monitoring.
+8. Optional transfer to high-risk visual front ends such as VPPV-style systems.
 
 ## Core Question
 
-Can depth, temporal, embedding, trajectory, calibration, and coverage-risk
-signals be distilled into a lightweight `visual_state_risk` score and then
-separated into mechanism-specific routes that tell a robot when to continue,
-re-perceive, recover, replan, or request human review?
+Can an industrial action-recognition model be upgraded with depth, temporal,
+embedding, trajectory, calibration, and coverage-risk evidence so that the
+system knows when to continue, re-observe the worker, pause or recover the
+robot action, or request human confirmation?
 
 ## Pipeline
 
@@ -28,14 +29,16 @@ flowchart LR
     D --> E["Risk distillation"]
     E --> F["Mechanism-separated routing"]
     F --> H["Runtime state machine"]
-    H --> G["Transfer case"]
+    H --> G["Industrial runtime action monitor"]
+    G --> I["Optional transfer case"]
 
     C --> C1["TUM RGB-D corruption benchmark"]
     D --> D1["Global / grid / PCA descriptor comparison"]
     E --> E1["visual_state_risk"]
     F --> F1["boundary-first / reserved residual budget"]
     H --> H1["NORMAL / SUSPECT / RECOVER / HUMAN_REVIEW"]
-    G --> G1["Trajectory residual and surgical-front-end case"]
+    G --> G1["Continue / re-observe / recover / human confirmation"]
+    I --> I1["High-risk visual front-end case"]
 ```
 
 ## Evidence Summary
@@ -45,7 +48,7 @@ flowchart LR
 | Risk distillation | 1800 aligned visual/action samples | Random Forest distillation ROC-AUC 0.992 | Depth/temporal/embedding/trajectory evidence becomes `visual_state_risk` |
 | Route evaluation | Distilled risk states | 1350 NORMAL, 433 SUSPECT, 17 RECOVER, 0 HUMAN_REVIEW | Risk maps to concrete autonomy actions |
 | Outcome-linked validation | Risk vs downstream signals | Top 10% risk captures 100% RECOVER/HUMAN_REVIEW | The score is decision-relevant, not only fitted to the distillation target |
-| Mechanism router | VPPV risk trace | 20% budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW | Scalar risk becomes mechanism-specific routing |
+| Reserved-budget router | visual-state risk trace | 20% budget captures 66.7% high-risk target cases and 76.5% RECOVER/HUMAN_REVIEW | Scalar risk becomes route-specific runtime actions |
 | Synthetic 3D reliability | Synthetic depth corruptions | ROC-AUC 0.804 +/- 0.028 | Smoke evidence for embedding-risk scoring |
 | TUM RGB-D corruption | 300 depth files, 1800 samples | source-paired ROC-AUC 1.000 | Controlled corruptions are detectable |
 | TUM scene-conditioned baseline | Same TUM run | ROC-AUC 0.483 | Global clean references fail under camera motion |
@@ -59,8 +62,8 @@ flowchart LR
 
 ## What This Shows
 
-- The project is best described as a general reliability monitor for sequential
-  robot perception, not as a project named after one surgical framework.
+- The project is best described as an industrial action-recognition pipeline
+  upgraded with a reliability monitor.
 - `visual_state_risk` distills heavier reliability evidence into a lightweight
   runtime score.
 - Mechanism-separated routing keeps embedding, temporal, depth, trajectory, and
@@ -70,12 +73,32 @@ flowchart LR
 - Local and learned descriptors improve pose-awareness, especially for rotation.
 - Reliability scores can be converted into runtime states and recovery actions.
 - Action-outcome residuals extend the project from perception to execution.
-- A VPPV-style surgical autonomy front end is one credible transfer target.
+- A VPPV-style visual front end is only a secondary transfer target, not the
+  main project identity.
 
-## VPPV-Style Transfer Case
+## Industrial Runtime Action Monitoring
 
-The VPPV-style section is used to demonstrate how the same reliability monitor
-would attach to a policy-driven surgical autonomy pipeline. The mapping is:
+The primary scenario is an industrial workcell or human-robot collaboration
+setting. The system recognizes worker actions or visual activity states, then
+uses reliability evidence to decide whether the robot can act on that estimate.
+
+```mermaid
+flowchart LR
+    A["Worker image sequence"] --> B["CNN-LSTM action/state prediction"]
+    B --> C["Reliability evidence"]
+    C --> D["NORMAL: continue task"]
+    C --> E["SUSPECT: re-observe or slow down"]
+    C --> F["RECOVER: pause / recover / replan"]
+    C --> G["HUMAN_REVIEW: operator confirmation"]
+```
+
+This is the main project output: a visual action-recognition model plus a
+runtime reliability monitor for uncertain industrial perception states.
+
+## Secondary Transfer Case: VPPV-Style Front-End Monitoring
+
+The VPPV-style section demonstrates how the same reliability monitor could
+attach to a different high-risk visual front end. The mapping is:
 
 ```mermaid
 flowchart LR
@@ -90,9 +113,9 @@ flowchart LR
 ```
 
 This transfer case preserves the general reliability-monitoring method while
-showing a concrete high-stakes front-end use case. The monitor is
-VPPV-compatible in spirit, but it is not a VPPV reproduction and has not yet
-been validated on paired surgical policy rollouts.
+showing a high-stakes front-end use case. It is not the main application, not a
+VPPV reproduction, and has not been validated on paired surgical policy
+rollouts.
 
 ## What It Does Not Prove
 
@@ -100,8 +123,8 @@ been validated on paired surgical policy rollouts.
 - Controlled corruptions do not replace real task failure labels.
 - PCA descriptors are sequence-fitted baselines, not general pretrained models.
 - Runtime state rules are auditable prototypes, not formal safety proofs.
-- The surgical-autonomy case is a transfer framing, not a claim of reproducing
-  VPPV itself.
+- The VPPV-style case is a secondary transfer framing, not a claim of
+  reproducing VPPV itself.
 
 ## Technical Reading Guide
 
@@ -113,12 +136,13 @@ been validated on paired surgical policy rollouts.
 | Calibration and coverage risk | `modules/calibration_analysis.py` |
 | Runtime state monitoring | `modules/runtime_monitor.py` |
 | Mechanism-separated routing | `docs/mechanism_separated_routing_upgrade.md` |
-| VPPV-style transfer case | `reports/vppv_perception_reliability_monitor.md` |
+| Secondary transfer case | `reports/vppv_perception_reliability_monitor.md` |
 
 ## Best Next Experiment
 
-Replace the current proxy labels with task-native evidence: robot-log failures,
-SLAM tracking quality, segmentation-mask quality, surgical-tool state regression
-error, simulator rollouts, or real action-outcome residuals. Then evaluate
-whether `visual_state_risk` predicts downstream failures and reduces unsafe
-execution through re-perception, recovery, or human review.
+Replace the current proxy labels with task-native industrial evidence:
+human-action misrecognition cases, worker-zone events, robot stop/replan logs,
+near-miss annotations, perception dropouts, or real action-outcome residuals.
+Then evaluate whether `visual_state_risk` predicts downstream failures and
+reduces unsafe execution through re-observation, recovery, or human
+confirmation.

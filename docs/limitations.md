@@ -1,9 +1,9 @@
 # Limitations
 
-This project is a research prototype for reliability-aware sequential robot
-perception. It is intentionally broader than one surgical autonomy framework:
-the main method is visual-state risk monitoring, while the VPPV-style section is
-only one transfer case.
+This project is a research prototype for industrial visual action recognition
+and reliability-aware robot perception. The main method is visual-state risk
+monitoring for uncertain action or perception states. The VPPV-style section is
+only a secondary transfer case.
 
 ## Confirmed By Current Evidence
 
@@ -32,8 +32,9 @@ only one transfer case.
   pretrained RGB-D representation.
 - Calibration scores show strong ranking but should not be interpreted as
   calibrated probabilities without additional calibration work.
-- The VPPV-style section does not reproduce VPPV and should not be presented as
-  a new VPPV method. It is a compatibility/application framing.
+- The primary target is industrial visual action monitoring. The VPPV-style
+  section does not reproduce VPPV and should not be presented as a new VPPV
+  method.
 - Runtime route rules are transparent engineering rules, not formal safety
   guarantees.
 - Mechanism-routing scores are currently rule-based and validation-oriented.
@@ -50,8 +51,8 @@ failures; they do not prove universal robustness.
 ## Next Validation Step
 
 The strongest next experiment is to replace proxy labels with task-native
-failure evidence: robot-log failures, SLAM tracking loss, segmentation quality,
-depth-estimation error, surgical-tool state regression error, simulator
-rollouts, or real action-outcome residuals. Then evaluate whether
-`visual_state_risk` predicts downstream failures and improves recovery or
-human-review decisions.
+industrial evidence: human-action misrecognition cases, worker-zone events,
+robot stop/replan logs, near-miss annotations, perception dropouts, or real
+action-outcome residuals. Then evaluate whether `visual_state_risk` predicts
+downstream failures and improves re-observation, recovery, or human-review
+decisions.

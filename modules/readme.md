@@ -34,16 +34,18 @@ theme. The recommended reading order is in `docs/experiment_order.md`.
 - `calibration_analysis.py`: calibration and coverage-risk analysis.
 - `trajectory_residual_demo.py`: planned-vs-observed action-outcome residuals.
 
-## Risk Distillation And Transfer Case
+## Risk Distillation And Runtime Routing
 
 - `run_vppv_perception_monitor.py`: distills depth, temporal, embedding,
   trajectory, calibration, and coverage-risk signals into `visual_state_risk`;
   exports feature attribution, signal-group ablation, top-risk explanations,
-  route policy, state counts, and outcome-linked validation.
+  route policy, state counts, and outcome-linked validation. The script name
+  retains the original transfer-case prefix, but the monitor is a general
+  visual-state reliability component.
 - `mechanism_router.py`: upgrades the scalar monitor into boundary-first and
   reserved-residual mechanism routing. It treats embedding, temporal, depth,
   trajectory, progress, and calibration evidence as failure-mechanism signals
   rather than direct class decisions.
 
-The script name keeps the `vppv_` prefix because it was created for the
-surgical-autonomy transfer case. It is not the overall project name.
+The primary project scenario is industrial visual action monitoring. The
+VPPV-style report is retained as a secondary transfer case.
